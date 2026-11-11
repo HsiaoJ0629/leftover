@@ -1,0 +1,409 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Leftover</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --blue-900:#0B2A6B; --blue-700:#1546B8; --blue-600:#1E5BD8; --blue-500:#3B78F0;
+    --blue-100:#E6EEFD; --blue-50:#F3F7FE;
+    --ink:#0F1B33; --muted:#5B6B86; --line:#E3E9F3; --bg:#F5F8FC; --card:#FFFFFF;
+    --good:#11875A; --bad:#C8352B; --warn:#B7791F;
+    --radius:16px; --shadow:0 1px 2px rgba(15,27,51,.06),0 8px 24px rgba(15,27,51,.06);
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:var(--bg);color:var(--ink);font-size:15px;line-height:1.45}
+  header{background:linear-gradient(135deg,var(--blue-900),var(--blue-600));color:#fff;padding:18px 16px 96px}
+  .wrap{max-width:960px;margin:0 auto;padding:0 16px}
+  .brand{display:flex;align-items:center;gap:10px;font-weight:700;font-size:18px}
+  .logo{width:32px;height:32px;border-radius:9px;background:rgba(255,255,255,.15);display:grid;place-items:center}
+  main{margin-top:-80px;padding-bottom:48px}
+  .card{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);padding:20px;margin-bottom:16px}
+  h2{font-size:16px;margin:0 0 14px;font-weight:600}
+  .muted{color:var(--muted)}
+
+  /* Hero */
+  .hero{text-align:center;padding:24px 20px}
+  .hero .label{color:var(--muted);font-size:13px;text-transform:uppercase;letter-spacing:.06em;font-weight:600}
+  .hero .big{font-size:44px;font-weight:700;letter-spacing:-.02em;margin:6px 0 2px;color:var(--blue-700);font-variant-numeric:tabular-nums}
+  .hero .big.neg{color:var(--bad)}
+  .hero .sub{color:var(--muted);font-size:14px}
+  .seg{display:inline-flex;background:var(--blue-50);border:1px solid var(--blue-100);border-radius:999px;padding:4px;margin:16px 0 4px;flex-wrap:wrap;justify-content:center}
+  .seg button{border:0;background:transparent;padding:7px 14px;border-radius:999px;font:inherit;font-size:13px;font-weight:600;color:var(--muted);cursor:pointer}
+  .seg button.on{background:var(--blue-600);color:#fff;box-shadow:0 2px 6px rgba(30,91,216,.35)}
+  .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:18px}
+  .stat{background:var(--blue-50);border-radius:12px;padding:12px}
+  .stat .k{font-size:12px;color:var(--muted)}
+  .stat .v{font-weight:700;font-size:17px;font-variant-numeric:tabular-nums}
+  .meter{height:10px;border-radius:99px;background:var(--blue-100);overflow:hidden;margin-top:18px;display:flex}
+  .meter span{display:block;height:100%}
+  .legend{display:flex;justify-content:space-between;font-size:12px;color:var(--muted);margin-top:6px}
+
+  /* Grid */
+  .grid{display:grid;grid-template-columns:1fr 1.4fr;gap:16px}
+  .grid > .card{margin-bottom:0}
+  label{display:block;font-size:13px;font-weight:500;color:var(--muted);margin-bottom:6px}
+  input,select{width:100%;font:inherit;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:#fff;color:var(--ink)}
+  input:focus,select:focus{outline:2px solid var(--blue-500);outline-offset:-1px;border-color:transparent}
+  .row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .money{position:relative}.money::before{content:"$";position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--muted)}
+  .money input{padding-left:24px}
+  .btn{border:0;background:var(--blue-600);color:#fff;font:inherit;font-weight:600;padding:11px 16px;border-radius:10px;cursor:pointer;width:100%}
+  .btn:hover{background:var(--blue-700)}
+  .btn.ghost{background:transparent;color:var(--blue-600);border:1px solid var(--blue-100)}
+  .btn.ghost:hover{background:var(--blue-50)}
+  .stack > * + *{margin-top:12px}
+
+  /* Bills */
+  .bill{display:grid;grid-template-columns:36px 1fr auto auto;gap:12px;align-items:center;padding:12px 0;border-bottom:1px solid var(--line)}
+  .bill:last-child{border-bottom:0}
+  .ico{width:36px;height:36px;border-radius:10px;display:grid;place-items:center;font-size:17px}
+  .bill .name{font-weight:600}
+  .bill .meta{font-size:12px;color:var(--muted)}
+  .bill .amt{text-align:right;font-variant-numeric:tabular-nums;font-weight:600}
+  .bill .amt small{display:block;font-weight:400;color:var(--muted);font-size:12px}
+  .x{border:0;background:transparent;color:var(--muted);cursor:pointer;font-size:18px;padding:4px 6px;border-radius:8px}
+  .x:hover{background:#FDECEA;color:var(--bad)}
+  .empty{text-align:center;color:var(--muted);padding:24px 0}
+  .cats{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+  .chip{font-size:12px;padding:5px 10px;border-radius:999px;background:var(--blue-50);color:var(--ink);display:flex;gap:6px;align-items:center}
+  .dot{width:8px;height:8px;border-radius:50%}
+  .quick{display:flex;flex-wrap:wrap;gap:6px}
+  .quick button{border:1px solid var(--blue-100);background:var(--blue-50);color:var(--blue-700);font:inherit;font-size:13px;font-weight:500;padding:6px 10px;border-radius:999px;cursor:pointer}
+  .quick button:hover{background:var(--blue-100)}
+  .quick button.on{background:var(--blue-600);border-color:var(--blue-600);color:#fff}
+  .head-row{display:flex;justify-content:space-between;align-items:baseline}
+  /* Don't-sweat-it */
+  .sweat{display:grid;grid-template-columns:1fr 1fr 1.3fr;gap:16px;align-items:end}
+  .sweat.ef{grid-template-columns:1fr 1fr 1fr}
+  .sweat .res{background:var(--blue-50);border-radius:12px;padding:14px;text-align:center}
+  .sweat .res .v{font-size:28px;font-weight:700;color:var(--blue-700);font-variant-numeric:tabular-nums}
+  .verdict{margin-top:14px;padding:12px 14px;border-radius:12px;font-weight:500}
+  .verdict.ok{background:#E7F6EE;color:var(--good)}
+  .verdict.think{background:#FDF4E3;color:var(--warn)}
+  .verdict.no{background:#FDECEA;color:var(--bad)}
+  .note{font-size:12px;color:var(--muted);margin-top:10px}
+  footer{text-align:center;color:var(--muted);font-size:12px;padding:8px 16px 32px}
+
+  @media (max-width:760px){
+    .grid{grid-template-columns:1fr}
+    .hero .big{font-size:36px}
+    .stats{grid-template-columns:1fr 1fr 1fr;gap:6px}
+    .stat .v{font-size:15px}
+    .sweat{grid-template-columns:1fr 1fr}
+    .sweat .res{grid-column:1 / -1}
+    .sweat.ef{grid-template-columns:1fr}
+  }
+</style>
+</head>
+<body>
+<header>
+  <div class="wrap brand"><div class="logo">$</div> Leftover <span style="font-weight:400;font-size:13px;opacity:.75;margin-left:4px">· bills, savings &amp; guilt-free money</span></div>
+</header>
+
+<main class="wrap">
+  <!-- HERO: the one number that matters -->
+  <section class="card hero">
+    <div class="label">Left to spend</div>
+    <div class="big" id="heroAmt">$0</div>
+    <div class="sub" id="heroSub">per fortnight after bills</div>
+    <div class="seg" id="periodSeg"></div>
+    <div class="stats">
+      <div class="stat"><div class="k">Income</div><div class="v" id="sIncome">$0</div></div>
+      <div class="stat"><div class="k">Bills</div><div class="v" id="sBills">$0</div></div>
+      <div class="stat"><div class="k">Bills % of pay</div><div class="v" id="sPct">0%</div></div>
+    </div>
+    <div class="meter" id="meter"></div>
+    <div class="legend"><span>Bills</span><span>Free to spend</span></div>
+  </section>
+
+  <div class="grid">
+    <!-- INPUTS -->
+    <section class="stack">
+      <div class="card">
+        <h2>1. Your take-home pay</h2>
+        <div class="row">
+          <div><label for="incAmt">Amount (after tax)</label><div class="money"><input id="incAmt" type="number" min="0" step="0.01" inputmode="decimal"></div></div>
+          <div><label for="incFreq">Paid</label><select id="incFreq"></select></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>2. Add a regular bill</h2>
+        <form id="billForm" class="stack">
+          <div><label>Quick add</label><div class="quick" id="quick"></div></div>
+          <div><label for="bName">What is it?</label><input id="bName" placeholder="e.g. Rent, Netflix, Car rego" required></div>
+          <div class="row">
+            <div><label for="bAmt">Amount</label><div class="money"><input id="bAmt" type="number" min="0" step="0.01" inputmode="decimal" required></div></div>
+            <div><label for="bFreq">How often</label><select id="bFreq"></select></div>
+          </div>
+          <div><label for="bCat">Category</label><select id="bCat"></select></div>
+          <button class="btn" type="submit">Add bill</button>
+        </form>
+      </div>
+      <button class="btn ghost" id="sampleBtn">Load example budget</button>
+    </section>
+
+    <!-- BILLS LIST -->
+    <section class="card">
+      <div class="head-row">
+        <h2>Regular bills</h2>
+        <span class="muted" style="font-size:13px" id="listHint">shown per fortnight</span>
+      </div>
+      <div id="bills"></div>
+      <div class="cats" id="cats"></div>
+    </section>
+  </div>
+
+  <!-- EMERGENCY FUND -->
+  <section class="card" style="margin-top:16px">
+    <div class="head-row"><h2>Emergency fund</h2><div class="seg" id="efSeg" style="margin:0"></div></div>
+    <p class="muted" style="margin:0 0 14px;font-size:13px">Money set aside in case you lose your job (redundancy, restructure, illness). The usual advice: enough to cover <b>3–6 months of bills</b> while you find new work.</p>
+    <div class="sweat ef">
+      <div class="res"><div class="k muted" style="font-size:12px">Your bills per month</div><div class="v" id="efMonth" style="font-size:22px">$0</div></div>
+      <div class="res"><div class="k muted" style="font-size:12px" id="efLbl">You should have</div><div class="v" id="efAmt">$0</div></div>
+      <button class="btn ghost" id="efGoal" type="button">Make this my savings goal</button>
+    </div>
+    <div class="note" id="efNote"></div>
+  </section>
+
+  <!-- SAVINGS GOAL -->
+  <section class="card" style="margin-top:16px">
+    <h2>3. Savings goal</h2>
+    <div class="sweat">
+      <div><label for="goalName">Saving for</label><input id="goalName" placeholder="e.g. Holiday, emergency fund"></div>
+      <div><label for="goalAmt">Goal amount</label><div class="money"><input id="goalAmt" type="number" min="0" step="100" inputmode="decimal" placeholder="e.g. 5000"></div></div>
+      <div><label for="goalHave">Already saved</label><div class="money"><input id="goalHave" type="number" min="0" step="100" inputmode="decimal" placeholder="0"></div></div>
+    </div>
+    <div style="margin-top:16px">
+      <div class="head-row"><label for="savePct" style="margin:0">Save this much of what's left to spend</label><b id="savePctLbl"></b></div>
+      <input id="savePct" type="range" min="0" max="100" step="5" style="padding:0;border:0;accent-color:var(--blue-600)">
+    </div>
+    <div class="stats">
+      <div class="stat"><div class="k">You'll reach it in</div><div class="v" id="gTime">–</div></div>
+      <div class="stat"><div class="k">Target date</div><div class="v" id="gDate">–</div></div>
+      <div class="stat"><div class="k">If you saved it all</div><div class="v" id="gFast">–</div></div>
+    </div>
+    <div class="meter" id="gMeter" style="margin-top:14px"><span id="gBar" style="background:var(--good)"></span></div>
+    <div class="legend"><span id="gProg"></span><span id="gLeft"></span></div>
+  </section>
+
+  <!-- GUILT-FREE -->
+  <section class="card">
+    <h2>4. Guilt-free spending</h2>
+    <p class="muted" style="margin:-6px 0 14px;font-size:13px">Bills paid, savings put aside: what's left is guilt-free. Spend it on snacks, coffee or fun without stressing. (Based on Ramit Sethi's “Conscious Spending Plan”.)</p>
+    <div class="sweat" style="grid-template-columns:1fr 1fr">
+      <div><label for="tryAmt">Thinking of buying…</label><div class="money"><input id="tryAmt" type="number" min="0" step="0.5" inputmode="decimal"></div></div>
+      <div class="res"><div class="k muted" style="font-size:12px">Guilt-free money per day</div><div class="v" id="sweatAmt">$0</div></div>
+    </div>
+    <div class="note" id="gfMath" style="font-size:13px;margin-top:14px"></div>
+    <div class="verdict" id="verdict"></div>
+    <div class="note">A rule of thumb, not financial advice.</div>
+  </section>
+</main>
+<footer>Prototype · Figures are estimates. Saved only in this browser.</footer>
+
+<script>
+const FREQ = { // occurrences per year
+  daily:{label:"Daily",n:365}, weekly:{label:"Weekly",n:52}, fortnightly:{label:"Fortnightly",n:26},
+  monthly:{label:"Monthly",n:12}, quarterly:{label:"Quarterly",n:4}, annually:{label:"Annually",n:1}
+};
+const PERIODS = ["daily","weekly","fortnightly","monthly","annually"];
+const PERIOD_WORD = {daily:"day",weekly:"week",fortnightly:"fortnight",monthly:"month",annually:"year"};
+const CATS = {
+  housing:{label:"Housing",icon:"🏠",color:"#1E5BD8"}, utilities:{label:"Utilities",icon:"💡",color:"#3B9BE0"},
+  transport:{label:"Transport",icon:"🚗",color:"#0E7C86"}, insurance:{label:"Insurance",icon:"🛡️",color:"#6B5BD6"},
+  subscriptions:{label:"Subscriptions",icon:"📺",color:"#D6408B"}, loans:{label:"Loans & cards",icon:"💳",color:"#C8352B"},
+  groceries:{label:"Groceries",icon:"🛒",color:"#11875A"}, other:{label:"Other",icon:"📦",color:"#8A94A6"}
+};
+// Common bills: name, category, usual frequency (amount left for the user)
+const PRESETS = [
+  ["Rent","housing","weekly"], ["Mortgage","housing","monthly"], ["Council rates","housing","quarterly"],
+  ["Electricity","utilities","quarterly"], ["Gas","utilities","quarterly"], ["Water","utilities","quarterly"],
+  ["Internet","utilities","monthly"], ["Mobile","utilities","monthly"],
+  ["Car insurance","insurance","annually"], ["Health insurance","insurance","monthly"], ["Home & contents","insurance","annually"],
+  ["Car rego","transport","annually"], ["Fuel","transport","weekly"], ["Public transport","transport","weekly"],
+  ["Groceries","groceries","weekly"], ["Streaming","subscriptions","monthly"], ["Gym","subscriptions","fortnightly"],
+  ["Credit card","loans","monthly"], ["Childcare","other","weekly"]
+];
+const SAMPLE = {
+  income:{amount:2800,freq:"fortnightly"},
+  goal:{name:"Japan trip",amount:6000,have:1500,pct:50},
+  bills:[
+    {name:"Rent",amount:550,freq:"weekly",cat:"housing"},
+    {name:"Electricity",amount:420,freq:"quarterly",cat:"utilities"},
+    {name:"Phone & internet",amount:95,freq:"monthly",cat:"utilities"},
+    {name:"Car insurance",amount:1100,freq:"annually",cat:"insurance"},
+    {name:"Car rego",amount:850,freq:"annually",cat:"transport"},
+    {name:"Fuel",amount:60,freq:"weekly",cat:"transport"},
+    {name:"Groceries",amount:180,freq:"weekly",cat:"groceries"},
+    {name:"Streaming",amount:25,freq:"monthly",cat:"subscriptions"},
+    {name:"Coffee",amount:5,freq:"daily",cat:"other"}
+  ]
+};
+
+const KEY = "spendable.v1";
+let state = load() || {income:{amount:0,freq:"fortnightly"},bills:[],period:"fortnightly"};
+
+function load(){ try{ return JSON.parse(localStorage.getItem(KEY)); }catch{ return null; } }
+function save(){ try{ localStorage.setItem(KEY,JSON.stringify(state)); }catch{} }
+
+const toPeriod = (amt,freq,period) => amt * FREQ[freq].n / FREQ[period].n;
+const fmt = v => (v<0?"-":"") + "$" + Math.abs(v).toLocaleString("en-AU",{minimumFractionDigits:2,maximumFractionDigits:2});
+const fmt0 = v => (v<0?"-":"") + "$" + Math.abs(Math.round(v)).toLocaleString("en-AU");
+const $ = id => document.getElementById(id);
+
+function fillSelect(el,obj,val){ el.innerHTML = Object.entries(obj).map(([k,v])=>`<option value="${k}">${v.label}</option>`).join(""); if(val) el.value=val; }
+fillSelect($("incFreq"),FREQ,state.income.freq);
+fillSelect($("bFreq"),FREQ,"monthly");
+fillSelect($("bCat"),CATS,"other");
+$("quick").innerHTML = PRESETS.map(([n,c],i)=>`<button type="button" data-q="${i}">${CATS[c].icon} ${n}</button>`).join("");
+$("quick").addEventListener("click",e=>{
+  const btn = e.target.closest("button"); if(!btn) return;
+  const [n,c,f] = PRESETS[+btn.dataset.q];
+  $("bName").value=n; $("bCat").value=c; $("bFreq").value=f;
+  document.querySelectorAll("#quick button").forEach(b=>b.classList.toggle("on",b===btn));
+  $("bAmt").focus();
+});
+$("periodSeg").innerHTML =PERIODS.map(p=>`<button data-p="${p}">${FREQ[p].label}</button>`).join("");
+
+function render(){
+  const P = state.period;
+  const income = toPeriod(+state.income.amount||0,state.income.freq,P);
+  const bills = state.bills.reduce((s,b)=>s+toPeriod(b.amount,b.freq,P),0);
+  const left = income - bills;
+  const pct = income>0 ? bills/income*100 : 0;
+
+  $("heroAmt").textContent = fmt(left);
+  $("heroAmt").classList.toggle("neg",left<0);
+  $("heroSub").textContent = left<0 ? `short per ${PERIOD_WORD[P]} — your bills are more than your pay`
+                                    : `per ${PERIOD_WORD[P]} after bills`;
+  $("sIncome").textContent = fmt0(income);
+  $("sBills").textContent = fmt0(bills);
+  $("sPct").textContent = Math.round(pct)+"%";
+  $("sPct").style.color = pct>80?"var(--bad)":pct>60?"var(--warn)":"var(--good)";
+  $("listHint").textContent = "shown per " + PERIOD_WORD[P];
+  document.querySelectorAll("#periodSeg button").forEach(b=>b.classList.toggle("on",b.dataset.p===P));
+
+  // meter split by category
+  const byCat = {};
+  state.bills.forEach(b=>byCat[b.cat]=(byCat[b.cat]||0)+toPeriod(b.amount,b.freq,P));
+  const total = Math.max(income,bills)||1;
+  $("meter").innerHTML = Object.entries(byCat).map(([c,v])=>`<span title="${CATS[c].label}: ${fmt(v)}" style="width:${v/total*100}%;background:${CATS[c].color}"></span>`).join("")
+    + (left>0?`<span style="width:${left/total*100}%;background:var(--blue-100)"></span>`:"");
+
+  // bill list
+  $("bills").innerHTML = state.bills.length ? state.bills.map((b,i)=>{
+    const c = CATS[b.cat];
+    return `<div class="bill">
+      <div class="ico" style="background:${c.color}1A">${c.icon}</div>
+      <div><div class="name">${esc(b.name)}</div><div class="meta">${fmt(b.amount)} ${FREQ[b.freq].label.toLowerCase()} · ${c.label}</div></div>
+      <div class="amt">${fmt(toPeriod(b.amount,b.freq,P))}<small>/${PERIOD_WORD[P]}</small></div>
+      <button class="x" data-i="${i}" aria-label="Remove ${esc(b.name)}">×</button>
+    </div>`;}).join("")
+    : `<div class="empty">No bills yet.<br>Add your rent, phone, insurance…</div>`;
+
+  $("cats").innerHTML = Object.entries(byCat).sort((a,b)=>b[1]-a[1]).map(([c,v])=>
+    `<span class="chip"><span class="dot" style="background:${CATS[c].color}"></span>${CATS[c].label} ${fmt0(v)}</span>`).join("");
+
+  // guilt-free spending: income − bills − extra debt/savings, per day
+  // emergency fund: N months of bills
+  const efM = state.efMonths, billsMonth = state.bills.reduce((s,b)=>s+toPeriod(b.amount,b.freq,"monthly"),0);
+  const efAmt = billsMonth*efM;
+  $("efMonth").textContent = fmt0(billsMonth);
+  $("efLbl").textContent = `${efM} months = you should have`;
+  $("efAmt").textContent = fmt0(efAmt);
+  document.querySelectorAll("#efSeg button").forEach(b=>b.classList.toggle("on",+b.dataset.m===efM));
+  const isEfGoal = state.goal.name==="Emergency fund";
+  $("efNote").textContent = !billsMonth ? "Add your bills to see how much you need."
+    : isEfGoal && state.goal.have ? `Your ${fmt0(state.goal.have)} saved would cover about ${(state.goal.have/billsMonth).toFixed(1)} months of bills.`
+    : "Keep it somewhere easy to reach, like a high-interest savings account or mortgage offset, not in shares. Any redundancy pay is a bonus, so don't count on it.";
+
+  // savings goal: save a % of `left` (the hero "Left to spend" for period P)
+  const pctSave = state.goal.pct;
+  const saveP = Math.max(0,left) * pctSave/100;     // saved per selected period
+  const need = Math.max(0,(+state.goal.amount||0) - (+state.goal.have||0));
+  const saveDay = toPeriod(saveP,P,"daily"), leftDay = toPeriod(Math.max(0,left),P,"daily");
+  $("savePctLbl").textContent = `${pctSave}% · ${fmt0(saveP)} per ${PERIOD_WORD[P]}`;
+  const gName = state.goal.name ? esc(state.goal.name) : "your goal";
+  if(!state.goal.amount){ $("gTime").textContent=$("gDate").textContent=$("gFast").textContent="–"; }
+  else if(!need){ $("gTime").textContent="Done 🎉"; $("gDate").textContent="Now"; $("gFast").textContent="–"; }
+  else {
+    $("gTime").textContent = saveDay>0 ? dur(need/saveDay) : "Never";
+    $("gDate").textContent = saveDay>0 ? new Date(Date.now()+need/saveDay*864e5).toLocaleDateString("en-AU",{month:"short",year:"numeric"}) : "–";
+    $("gFast").textContent = leftDay>0 ? dur(need/leftDay) : "–";
+  }
+  const goalPct = state.goal.amount ? Math.min(100,(+state.goal.have||0)/state.goal.amount*100) : 0;
+  $("gBar").style.width = goalPct+"%";
+  $("gProg").textContent = state.goal.amount ? `${fmt0(+state.goal.have||0)} saved for ${state.goal.name||"goal"} (${Math.round(goalPct)}%)` : "Set a goal amount to see your progress";
+  $("gLeft").textContent = state.goal.amount ? `${fmt0(need)} to go` : "";
+
+  // guilt-free = left − savings
+  const tryAmt = +state.tryAmt||0;
+  const guiltFree = left - saveP;                 // per selected period
+  const perDay = toPeriod(guiltFree,P,"daily");
+  const perWeek = toPeriod(guiltFree,P,"weekly");
+  $("sweatAmt").textContent = fmt(perDay);
+  $("sweatAmt").style.color = perDay<0 ? "var(--bad)" : "";
+  $("gfMath").innerHTML = `Left to spend <b>${fmt(left)}</b> − saving for ${gName} <b>${fmt(saveP)}</b> = <b>${fmt(guiltFree)}</b> guilt-free per ${PERIOD_WORD[P]}`;
+  const v = $("verdict");
+  if(!state.income.amount){ v.className="verdict think"; v.textContent="Enter your take-home pay above to see your guilt-free money."; }
+  else if(left<=0){ v.className="verdict no"; v.textContent=`Your bills are more than your pay right now, so there's nothing left to save or spend. Start by looking for a bill to cut.`; }
+  else if(perDay<=0){ v.className="verdict think"; v.textContent=`You're saving everything that's left. Fastest way to ${gName}, but there's no guilt-free money. Try lowering the slider a bit.`; }
+  else if(!tryAmt){ v.className="verdict ok"; v.textContent=`You have ${fmt(perDay)} a day (${fmt0(perWeek)} a week) to spend guilt-free.`; }
+  else if(tryAmt<=perDay){ v.className="verdict ok"; v.textContent=`✅ ${fmt(tryAmt)}: go for it. It's ${Math.round(tryAmt/perDay*100)}% of today's ${fmt(perDay)} guilt-free money.`; }
+  else if(tryAmt<=perWeek){ v.className="verdict think"; v.textContent=`🤔 ${fmt(tryAmt)} is more than one day's ${fmt(perDay)}, but fits in this week's ${fmt0(perWeek)}. Fine if you spend less on the other days.`; }
+  else { v.className="verdict no"; v.textContent=`✋ ${fmt(tryAmt)} is more than a whole week of guilt-free money (${fmt0(perWeek)}). Plan for it or save up first.`; }
+  save();
+}
+function dur(days){
+  days = Math.ceil(days);
+  if(days<=13) return days+(days===1?" day":" days");
+  if(days<=90) return Math.round(days/7)+" weeks";
+  const m = Math.round(days/30.44);
+  if(m<24) return m+" months";
+  const y = Math.floor(m/12), r = m%12;
+  return y+" yrs"+(r?" "+r+" mo":"");
+}
+function esc(s){ return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])); }
+
+$("incAmt").value = state.income.amount || "";
+$("incAmt").addEventListener("input",e=>{state.income.amount=+e.target.value||0;render();});
+$("incFreq").addEventListener("change",e=>{state.income.freq=e.target.value;render();});
+if(state.tryAmt==null) state.tryAmt = 10;
+delete state.debtPay; delete state.netWorth;
+state.goal = Object.assign({name:"",amount:0,have:0,pct:50}, state.goal);
+function fillGoal(){ $("goalName").value=state.goal.name; $("goalAmt").value=state.goal.amount||""; $("goalHave").value=state.goal.have||""; $("savePct").value=state.goal.pct; }
+fillGoal();
+if(!state.efMonths) state.efMonths = 3;
+$("efSeg").innerHTML = [3,6].map(m=>`<button type="button" data-m="${m}">${m} months</button>`).join("");
+$("efSeg").addEventListener("click",e=>{ if(e.target.dataset.m){state.efMonths=+e.target.dataset.m;render();} });
+$("efGoal").addEventListener("click",()=>{
+  const m = state.bills.reduce((s,b)=>s+toPeriod(b.amount,b.freq,"monthly"),0);
+  state.goal.name = "Emergency fund"; state.goal.amount = Math.round(m*state.efMonths);
+  fillGoal(); render(); $("goalHave").focus();
+});
+$("tryAmt").value = state.tryAmt || "";
+$("goalName").addEventListener("input",e=>{state.goal.name=e.target.value;render();});
+$("goalAmt").addEventListener("input",e=>{state.goal.amount=+e.target.value||0;render();});
+$("goalHave").addEventListener("input",e=>{state.goal.have=+e.target.value||0;render();});
+$("savePct").addEventListener("input",e=>{state.goal.pct=+e.target.value;render();});
+$("tryAmt").addEventListener("input",e=>{state.tryAmt=+e.target.value||0;render();});
+$("periodSeg").addEventListener("click",e=>{ if(e.target.dataset.p){state.period=e.target.dataset.p;render();} });
+$("bills").addEventListener("click",e=>{ if(e.target.dataset.i!=null){state.bills.splice(+e.target.dataset.i,1);render();} });
+$("billForm").addEventListener("submit",e=>{
+  e.preventDefault();
+  state.bills.push({name:$("bName").value.trim(),amount:+$("bAmt").value||0,freq:$("bFreq").value,cat:$("bCat").value});
+  e.target.reset(); document.querySelectorAll("#quick button.on").forEach(b=>b.classList.remove("on")); $("bFreq").value="monthly"; $("bCat").value="other"; $("bName").focus(); render();
+});
+$("sampleBtn").addEventListener("click",()=>{
+  state = {...JSON.parse(JSON.stringify(SAMPLE)),period:state.period,tryAmt:state.tryAmt,efMonths:state.efMonths};
+  $("incAmt").value=state.income.amount; $("incFreq").value=state.income.freq; fillGoal(); render();
+});
+render();
+</script>
+</body>
+</html>
