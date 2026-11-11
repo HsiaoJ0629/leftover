@@ -86,6 +86,20 @@
   .verdict.think{background:#FDF4E3;color:var(--warn)}
   .verdict.no{background:#FDECEA;color:var(--bad)}
   .note{font-size:12px;color:var(--muted);margin-top:10px}
+  /* Comfy income */
+  .tiers{display:grid;grid-template-columns:1fr 1fr 1.3fr;gap:10px}
+  .tier{background:var(--blue-50);border:2px solid transparent;border-radius:12px;padding:12px;text-align:center}
+  .tier .k{font-size:12px;color:var(--muted);font-weight:600}
+  .tier .v{font-size:20px;font-weight:700;font-variant-numeric:tabular-nums;margin:2px 0}
+  .tier .s{font-size:11px;color:var(--muted)}
+  .tier.comfy{background:#E7F6EE}.tier.comfy .v{color:var(--good)}
+  .tier.you{border-color:var(--blue-600)}
+  .tier.you .k::after{content:" · you";color:var(--blue-600)}
+  .gauge{position:relative;height:12px;border-radius:99px;background:var(--blue-100);margin:30px 0 0;display:flex;overflow:visible}
+  .gauge span.z{display:block;height:100%}
+  .gauge span.z:first-child{border-radius:99px 0 0 99px}.gauge span.z:last-child{border-radius:0 99px 99px 0}
+  .pin{position:absolute;top:-24px;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;font-size:11px;font-weight:700;color:var(--ink);white-space:nowrap}
+  .pin::after{content:"";width:3px;height:30px;background:var(--ink);border-radius:2px;margin-top:2px}
   footer{text-align:center;color:var(--muted);font-size:12px;padding:8px 16px 32px}
 
   @media (max-width:760px){
@@ -96,6 +110,8 @@
     .sweat{grid-template-columns:1fr 1fr}
     .sweat .res{grid-column:1 / -1}
     .sweat.ef{grid-template-columns:1fr}
+    .tiers{grid-template-columns:1fr 1fr}
+    .tier.comfy{grid-column:1 / -1}
   }
 </style>
 </head>
@@ -157,6 +173,21 @@
       <div class="cats" id="cats"></div>
     </section>
   </div>
+
+  <!-- COMFY INCOME -->
+  <section class="card" style="margin-top:16px">
+    <div class="head-row"><h2>Income for a comfy life</h2><span class="muted" style="font-size:13px" id="cHint">take-home per fortnight</span></div>
+    <p class="muted" style="margin:0 0 14px;font-size:13px">Based on the <b>50/30/20 rule</b>: bills take no more than half your take-home pay, leaving 30% for fun and 20% for savings. Worked out from your bills.</p>
+    <div class="tiers">
+      <div class="tier" id="tMin"><div class="k">Just covers bills</div><div class="v" id="cMin">$0</div><div class="s">bills are 100% of pay</div></div>
+      <div class="tier" id="tTight"><div class="k">Getting by</div><div class="v" id="cTight">$0</div><div class="s">bills are 70% of pay</div></div>
+      <div class="tier comfy" id="tComfy"><div class="k">Comfy ✨</div><div class="v" id="cComfy">$0</div><div class="s">bills are 40–50% of pay</div></div>
+    </div>
+    <div class="gauge" id="cGauge"></div>
+    <div class="legend"><span>Short</span><span>Tight</span><span>Getting by</span><span style="color:var(--good)">Comfy</span></div>
+    <div class="verdict" id="cVerdict"></div>
+    <div class="note" id="cGross"></div>
+  </section>
 
   <!-- EMERGENCY FUND -->
   <section class="card" style="margin-top:16px">
@@ -309,6 +340,29 @@ function render(){
   $("cats").innerHTML = Object.entries(byCat).sort((a,b)=>b[1]-a[1]).map(([c,v])=>
     `<span class="chip"><span class="dot" style="background:${CATS[c].color}"></span>${CATS[c].label} ${fmt0(v)}</span>`).join("");
 
+  // comfy income: 50/30/20 rule, worked back from bills
+  const cTight = bills/0.7, cLo = bills/0.5, cHi = bills/0.4;
+  $("cHint").textContent = "take-home per " + PERIOD_WORD[P];
+  $("cMin").textContent = fmt0(bills);
+  $("cTight").textContent = fmt0(cTight);
+  $("cComfy").textContent = bills ? `${fmt0(cLo)} – ${fmt0(cHi)}` : "$0";
+  const zone = !bills||!income ? "" : income>=cLo ? "tComfy" : income>=cTight ? "tTight" : "tMin";
+  ["tMin","tTight","tComfy"].forEach(id=>$(id).classList.toggle("you",id===zone));
+  const S = Math.max(cHi*1.15, income*1.08) || 1;
+  const zw = [[bills,"#F4B9B4"],[cTight-bills,"#F6D9A0"],[cLo-cTight,"#BFD3F8"],[S-cLo,"#8ED3B0"]];
+  $("cGauge").innerHTML = bills ? zw.map(([w,c])=>`<span class="z" style="width:${w/S*100}%;background:${c}"></span>`).join("")
+    + (income ? `<div class="pin" style="left:${Math.min(98,Math.max(2,income/S*100))}%">You</div>` : "") : "";
+  const cv = $("cVerdict"), per = PERIOD_WORD[P];
+  if(!bills){ cv.className="verdict think"; cv.textContent="Add your bills to see what income gives you a comfy life."; }
+  else if(!income){ cv.className="verdict think"; cv.textContent=`Aim for ${fmt0(cLo)}–${fmt0(cHi)} take-home per ${per}. Enter your pay to see where you sit.`; }
+  else if(income<bills){ cv.className="verdict no"; cv.textContent=`You need ${fmt0(bills-income)} more per ${per} just to cover bills, and ${fmt0(cLo-income)} more to be comfy.`; }
+  else if(income<cLo){ cv.className="verdict think"; cv.textContent=`${income<cTight?"Tight":"Getting by"}: bills take ${Math.round(pct)}% of your pay. To be comfy, earn ${fmt0(cLo-income)} more per ${per}, or cut bills by ${fmt0(bills-income*0.5)}.`; }
+  else { cv.className="verdict ok"; cv.textContent=`🎉 You're in the comfy zone. Bills take ${Math.round(pct)}% of your pay, leaving room for fun and savings.`; }
+  const yr = v => toPeriod(v,P,"annually");
+  $("cGross").textContent = bills ? `Comfy before tax: about ${fmt0(grossFor(yr(cLo)))}–${fmt0(grossFor(yr(cHi)))} a year`
+    + (income ? ` (you: about ${fmt0(grossFor(yr(income)))})` : "")
+    + `. Uses Australian 2026–27 tax rates with Medicare levy; excludes super, HELP and other deductions.` : "";
+
   // guilt-free spending: income − bills − extra debt/savings, per day
   // emergency fund: N months of bills
   const efM = state.efMonths, billsMonth = state.bills.reduce((s,b)=>s+toPeriod(b.amount,b.freq,"monthly"),0);
@@ -367,6 +421,21 @@ function dur(days){
   if(m<24) return m+" months";
   const y = Math.floor(m/12), r = m%12;
   return y+" yrs"+(r?" "+r+" mo":"");
+}
+// Australian resident income tax 2026–27 (incl. LITO and Medicare levy). Estimates only.
+function auTax(g){
+  const B = [[18200,0],[45000,.15],[135000,.30],[190000,.37],[Infinity,.45]];
+  let t = 0, lo = 0;
+  for(const [hi,r] of B){ if(g>lo) t += (Math.min(g,hi)-lo)*r; lo = hi; }
+  const lito = g<=37500 ? 700 : g<=45000 ? 700-(g-37500)*.05 : g<=66667 ? 325-(g-45000)*.015 : 0;
+  t = Math.max(0, t-lito);
+  const medicare = g<=27222 ? 0 : Math.min((g-27222)*.1, g*.02);
+  return t + medicare;
+}
+function grossFor(net){ // invert take-home -> gross salary by bisection
+  let lo = net, hi = net*2+50000;
+  for(let i=0;i<60;i++){ const m=(lo+hi)/2; if(m-auTax(m)<net) lo=m; else hi=m; }
+  return (lo+hi)/2;
 }
 function esc(s){ return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])); }
 
