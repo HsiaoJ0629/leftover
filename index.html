@@ -13,8 +13,24 @@
     --ink:#0F1B33; --muted:#5B6B86; --line:#E3E9F3; --bg:#F5F8FC; --card:#FFFFFF;
     --good:#11875A; --bad:#C8352B; --warn:#B7791F;
     --radius:16px; --shadow:0 1px 2px rgba(15,27,51,.06),0 8px 24px rgba(15,27,51,.06);
+    --accent-text:#1546B8; --input-bg:#fff; --ok-bg:#E7F6EE; --warn-bg:#FDF4E3; --bad-bg:#FDECEA;
+    color-scheme:light;
+  }
+  @media screen and (prefers-color-scheme:dark){
+    :root{
+      --ink:#E8EEFA; --muted:#9AA9C4; --line:#26324A; --bg:#0B1220; --card:#131C30;
+      --blue-50:#18243D; --blue-100:#243456; --blue-500:#6A9BFF;
+      --good:#4CCB94; --bad:#FF7A70; --warn:#E8B04A;
+      --accent-text:#8FB3FF; --input-bg:#0F1729; --ok-bg:#12302A; --warn-bg:#33290F; --bad-bg:#3A1A1A;
+      --shadow:0 1px 2px rgba(0,0,0,.4),0 8px 24px rgba(0,0,0,.35);
+      color-scheme:dark;
+    }
   }
   *{box-sizing:border-box}
+  button,input,select,textarea{transition:background-color .18s,border-color .18s,color .18s,box-shadow .18s}
+  button:focus-visible,summary:focus-visible{outline:2px solid var(--blue-500);outline-offset:2px}
+  .i{width:1.1em;height:1.1em;flex:none;vertical-align:-.15em}
+  @media (prefers-reduced-motion:reduce){*{transition:none !important;animation:none !important}}
   body{margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:var(--bg);color:var(--ink);font-size:15px;line-height:1.45}
   header{background:linear-gradient(135deg,var(--blue-900),var(--blue-600));color:#fff;padding:18px 16px 96px}
   .wrap{max-width:960px;margin:0 auto;padding:0 16px}
@@ -28,11 +44,11 @@
   /* Hero */
   .hero{text-align:center;padding:24px 20px}
   .hero .label{color:var(--muted);font-size:13px;text-transform:uppercase;letter-spacing:.06em;font-weight:600}
-  .hero .big{font-size:44px;font-weight:700;letter-spacing:-.02em;margin:6px 0 2px;color:var(--blue-700);font-variant-numeric:tabular-nums}
+  .hero .big{font-size:44px;font-weight:700;letter-spacing:-.02em;margin:6px 0 2px;color:var(--accent-text);font-variant-numeric:tabular-nums}
   .hero .big.neg{color:var(--bad)}
   .hero .sub{color:var(--muted);font-size:14px}
   .seg{display:inline-flex;background:var(--blue-50);border:1px solid var(--blue-100);border-radius:999px;padding:4px;margin:16px 0 4px;flex-wrap:wrap;justify-content:center}
-  .seg button{border:0;background:transparent;padding:7px 14px;border-radius:999px;font:inherit;font-size:13px;font-weight:600;color:var(--muted);cursor:pointer}
+  .seg button{border:0;background:transparent;padding:10px 14px;min-height:40px;border-radius:999px;font:inherit;font-size:13px;font-weight:600;color:var(--muted);cursor:pointer}
   .seg button.on{background:var(--blue-600);color:#fff;box-shadow:0 2px 6px rgba(30,91,216,.35)}
   .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:18px}
   .stat{background:var(--blue-50);border-radius:12px;padding:12px}
@@ -46,12 +62,14 @@
   .grid{display:grid;grid-template-columns:1fr 1.4fr;gap:16px}
   .grid > .card{margin-bottom:0}
   label{display:block;font-size:13px;font-weight:500;color:var(--muted);margin-bottom:6px}
-  input,select{width:100%;font:inherit;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:#fff;color:var(--ink)}
+  input,select{width:100%;font:inherit;padding:11px 12px;min-height:44px;border:1px solid var(--line);border-radius:10px;background:var(--input-bg);color:var(--ink)}
+  input:hover,select:hover{border-color:var(--blue-500)}
   input:focus,select:focus{outline:2px solid var(--blue-500);outline-offset:-1px;border-color:transparent}
   .row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
   .money{position:relative}.money::before{content:"$";position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--muted)}
   .money input{padding-left:24px}
-  .btn{border:0;background:var(--blue-600);color:#fff;font:inherit;font-weight:600;padding:11px 16px;border-radius:10px;cursor:pointer;width:100%}
+  .btn{border:0;background:var(--blue-600);color:#fff;font:inherit;font-weight:600;padding:11px 16px;min-height:44px;border-radius:10px;cursor:pointer;width:100%}
+  .btn:active,.seg button:active,.quick button:active{transform:scale(.98)}
   .btn:hover{background:var(--blue-700)}
   .btn.ghost{background:transparent;color:var(--blue-600);border:1px solid var(--blue-100)}
   .btn.ghost:hover{background:var(--blue-50)}
@@ -60,19 +78,19 @@
   /* Bills */
   .bill{display:grid;grid-template-columns:36px 1fr auto auto;gap:12px;align-items:center;padding:12px 0;border-bottom:1px solid var(--line)}
   .bill:last-child{border-bottom:0}
-  .ico{width:36px;height:36px;border-radius:10px;display:grid;place-items:center;font-size:17px}
+  .ico{width:36px;height:36px;border-radius:10px;display:grid;place-items:center;font-size:18px}
   .bill .name{font-weight:600}
   .bill .meta{font-size:12px;color:var(--muted)}
   .bill .amt{text-align:right;font-variant-numeric:tabular-nums;font-weight:600}
   .bill .amt small{display:block;font-weight:400;color:var(--muted);font-size:12px}
-  .x{border:0;background:transparent;color:var(--muted);cursor:pointer;font-size:18px;padding:4px 6px;border-radius:8px}
-  .x:hover{background:#FDECEA;color:var(--bad)}
+  .x{border:0;background:transparent;color:var(--muted);cursor:pointer;font-size:20px;width:44px;height:44px;margin-right:-8px;border-radius:10px}
+  .x:hover{background:var(--bad-bg);color:var(--bad)}
   .empty{text-align:center;color:var(--muted);padding:24px 0}
   .cats{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
-  .chip{font-size:12px;padding:5px 10px;border-radius:999px;background:var(--blue-50);color:var(--ink);display:flex;gap:6px;align-items:center}
+  .chip{font-size:13px;padding:5px 10px;border-radius:999px;background:var(--blue-50);color:var(--ink);display:flex;gap:6px;align-items:center}
   .dot{width:8px;height:8px;border-radius:50%}
   .quick{display:flex;flex-wrap:wrap;gap:6px}
-  .quick button{border:1px solid var(--blue-100);background:var(--blue-50);color:var(--blue-700);font:inherit;font-size:13px;font-weight:500;padding:6px 10px;border-radius:999px;cursor:pointer}
+  .quick button{border:1px solid var(--blue-100);background:var(--blue-50);color:var(--accent-text);font:inherit;font-size:13px;font-weight:500;padding:8px 12px;border-radius:999px;cursor:pointer;display:inline-flex;gap:6px;align-items:center}
   .quick button:hover{background:var(--blue-100)}
   .quick button.on{background:var(--blue-600);border-color:var(--blue-600);color:#fff}
   .head-row{display:flex;justify-content:space-between;align-items:baseline}
@@ -80,19 +98,19 @@
   .sweat{display:grid;grid-template-columns:1fr 1fr 1.3fr;gap:16px;align-items:end}
   .sweat.ef{grid-template-columns:1fr 1fr 1fr}
   .sweat .res{background:var(--blue-50);border-radius:12px;padding:14px;text-align:center}
-  .sweat .res .v{font-size:28px;font-weight:700;color:var(--blue-700);font-variant-numeric:tabular-nums}
-  .verdict{margin-top:14px;padding:12px 14px;border-radius:12px;font-weight:500}
-  .verdict.ok{background:#E7F6EE;color:var(--good)}
-  .verdict.think{background:#FDF4E3;color:var(--warn)}
-  .verdict.no{background:#FDECEA;color:var(--bad)}
+  .sweat .res .v{font-size:28px;font-weight:700;color:var(--accent-text);font-variant-numeric:tabular-nums}
+  .verdict{margin-top:14px;padding:12px 14px;border-radius:12px;font-weight:500;border-left:4px solid currentColor}
+  .verdict.ok{background:var(--ok-bg);color:var(--good)}
+  .verdict.think{background:var(--warn-bg);color:var(--warn)}
+  .verdict.no{background:var(--bad-bg);color:var(--bad)}
   .note{font-size:12px;color:var(--muted);margin-top:10px}
   /* Comfy income */
   .tiers{display:grid;grid-template-columns:1fr 1fr 1.3fr;gap:10px}
   .tier{background:var(--blue-50);border:2px solid transparent;border-radius:12px;padding:12px;text-align:center}
   .tier .k{font-size:12px;color:var(--muted);font-weight:600}
   .tier .v{font-size:20px;font-weight:700;font-variant-numeric:tabular-nums;margin:2px 0}
-  .tier .s{font-size:11px;color:var(--muted)}
-  .tier.comfy{background:#E7F6EE}.tier.comfy .v{color:var(--good)}
+  .tier .s{font-size:12px;color:var(--muted)}
+  .tier.comfy{background:var(--ok-bg)}.tier.comfy .v{color:var(--good)}
   .tier.you{border-color:var(--blue-600)}
   .tier.you .k::after{content:" · you";color:var(--blue-600)}
   .gauge{position:relative;height:12px;border-radius:99px;background:var(--blue-100);margin:30px 0 0;display:flex;overflow:visible}
@@ -100,7 +118,7 @@
   .gauge span.z:first-child{border-radius:99px 0 0 99px}.gauge span.z:last-child{border-radius:0 99px 99px 0}
   .pin{position:absolute;top:-24px;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;font-size:11px;font-weight:700;color:var(--ink);white-space:nowrap}
   .pin::after{content:"";width:3px;height:30px;background:var(--ink);border-radius:2px;margin-top:2px}
-  textarea{width:100%;font:12px/1.4 ui-monospace,SFMono-Regular,Consolas,monospace;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:#fff;color:var(--ink);resize:vertical}
+  textarea{width:100%;font:12px/1.4 ui-monospace,SFMono-Regular,Consolas,monospace;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:var(--input-bg);color:var(--ink);resize:vertical}
   textarea:focus{outline:2px solid var(--blue-500);outline-offset:-1px;border-color:transparent}
   .io-btns{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:12px}
   footer{text-align:center;color:var(--muted);font-size:12px;padding:8px 16px 32px}
@@ -120,7 +138,7 @@
   }
 
   /* Print: a clean summary on white paper */
-  .print-btn{margin-left:auto;border:1px solid rgba(255,255,255,.35);background:rgba(255,255,255,.12);color:#fff;font:inherit;font-size:13px;font-weight:600;padding:7px 12px;border-radius:999px;cursor:pointer}
+  .print-btn{margin-left:auto;border:1px solid rgba(255,255,255,.35);background:rgba(255,255,255,.12);color:#fff;font:inherit;font-size:13px;font-weight:600;padding:9px 14px;border-radius:999px;cursor:pointer;display:inline-flex;gap:6px;align-items:center}
   .print-btn:hover{background:rgba(255,255,255,.22)}
   .print-date{display:none}
   @media print{
@@ -152,14 +170,14 @@
 <header>
   <div class="wrap brand"><div class="logo">$</div> Leftover <span style="font-weight:400;font-size:13px;opacity:.75;margin-left:4px">· bills, savings &amp; guilt-free money</span>
     <span class="print-date" id="printDate"></span>
-    <button class="print-btn no-print" type="button" id="printBtn">🖨️ Print</button></div>
+    <button class="print-btn no-print" type="button" id="printBtn"><svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect width="12" height="8" x="6" y="14"/></svg>Print</button></div>
 </header>
 
 <main class="wrap">
   <!-- HERO: the one number that matters -->
   <section class="card hero">
     <div class="label">Left to spend</div>
-    <div class="big" id="heroAmt">$0</div>
+    <div class="big" id="heroAmt" role="status" aria-live="polite">$0</div>
     <div class="sub" id="heroSub">per fortnight after bills</div>
     <div class="seg" id="periodSeg"></div>
     <div class="stats">
@@ -216,7 +234,7 @@
     <div class="tiers">
       <div class="tier" id="tMin"><div class="k">Just covers bills</div><div class="v" id="cMin">$0</div><div class="s">bills are 100% of pay</div></div>
       <div class="tier" id="tTight"><div class="k">Getting by</div><div class="v" id="cTight">$0</div><div class="s">bills are 70% of pay</div></div>
-      <div class="tier comfy" id="tComfy"><div class="k">Comfy ✨</div><div class="v" id="cComfy">$0</div><div class="s">bills are 40–50% of pay</div></div>
+      <div class="tier comfy" id="tComfy"><div class="k">Comfy</div><div class="v" id="cComfy">$0</div><div class="s">bills are 40–50% of pay</div></div>
     </div>
     <div class="gauge" id="cGauge"></div>
     <div class="legend"><span>Short</span><span>Tight</span><span>Getting by</span><span style="color:var(--good)">Comfy</span></div>
@@ -294,11 +312,16 @@ const FREQ = { // occurrences per year
 };
 const PERIODS = ["daily","weekly","fortnightly","monthly","annually"];
 const PERIOD_WORD = {daily:"day",weekly:"week",fortnightly:"fortnight",monthly:"month",annually:"year"};
+const svg = p => `<svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${p}</svg>`;
 const CATS = {
-  housing:{label:"Housing",icon:"🏠",color:"#1E5BD8"}, utilities:{label:"Utilities",icon:"💡",color:"#3B9BE0"},
-  transport:{label:"Transport",icon:"🚗",color:"#0E7C86"}, insurance:{label:"Insurance",icon:"🛡️",color:"#6B5BD6"},
-  subscriptions:{label:"Subscriptions",icon:"📺",color:"#D6408B"}, loans:{label:"Loans & cards",icon:"💳",color:"#C8352B"},
-  groceries:{label:"Groceries",icon:"🛒",color:"#11875A"}, other:{label:"Other",icon:"📦",color:"#8A94A6"}
+  housing:{label:"Housing",icon:svg('<path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M9 22V12h6v10"/>'),color:"#1E5BD8"},
+  utilities:{label:"Utilities",icon:svg('<path d="M13 2 3 14h9l-1 8 10-12h-9z"/>'),color:"#3B9BE0"},
+  transport:{label:"Transport",icon:svg('<path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.4 2.9A3.7 3.7 0 0 0 2 12v4c0 .6.4 1 1 1h2"/><circle cx="7" cy="17" r="2"/><path d="M9 17h6"/><circle cx="17" cy="17" r="2"/>'),color:"#0E7C86"},
+  insurance:{label:"Insurance",icon:svg('<path d="M20 13c0 5-3.5 7.5-7.7 8.9a1 1 0 0 1-.6 0C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.2-2.7a1.2 1.2 0 0 1 1.6 0C14.5 3.8 17 5 19 5a1 1 0 0 1 1 1z"/>'),color:"#6B5BD6"},
+  subscriptions:{label:"Subscriptions",icon:svg('<rect width="20" height="15" x="2" y="7" rx="2"/><path d="m17 2-5 5-5-5"/>'),color:"#D6408B"},
+  loans:{label:"Loans & cards",icon:svg('<rect width="20" height="14" x="2" y="5" rx="2"/><path d="M2 10h20"/>'),color:"#C8352B"},
+  groceries:{label:"Groceries",icon:svg('<circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2 2h2l2.7 12.4a2 2 0 0 0 2 1.6h9.8a2 2 0 0 0 2-1.6L22 7H5.1"/>'),color:"#11875A"},
+  other:{label:"Other",icon:svg('<path d="M21 8a2 2 0 0 0-1-1.7l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.7l7 4a2 2 0 0 0 2 0l7-4a2 2 0 0 0 1-1.7z"/><path d="m3.3 7 8.7 5 8.7-5M12 22V12"/>'),color:"#8A94A6"}
 };
 // Common bills: name, category, usual frequency (amount left for the user)
 const PRESETS = [
@@ -380,7 +403,7 @@ function render(){
   $("bills").innerHTML = state.bills.length ? state.bills.map((b,i)=>{
     const c = CATS[b.cat];
     return `<div class="bill">
-      <div class="ico" style="background:${c.color}1A">${c.icon}</div>
+      <div class="ico" style="background:${c.color}26;color:${c.color}">${c.icon}</div>
       <div><div class="name">${esc(b.name)}</div><div class="meta">${fmt(b.amount)} ${FREQ[b.freq].label.toLowerCase()} · ${c.label}</div></div>
       <div class="amt">${fmt(toPeriod(b.amount,b.freq,P))}<small>/${PERIOD_WORD[P]}</small></div>
       <button class="x" data-i="${i}" aria-label="Remove ${esc(b.name)}">×</button>
@@ -407,7 +430,7 @@ function render(){
   else if(!income){ cv.className="verdict think"; cv.textContent=`Aim for ${fmt0(cLo)}–${fmt0(cHi)} take-home per ${per}. Enter your pay to see where you sit.`; }
   else if(income<bills){ cv.className="verdict no"; cv.textContent=`You need ${fmt0(bills-income)} more per ${per} just to cover bills, and ${fmt0(cLo-income)} more to be comfy.`; }
   else if(income<cLo){ cv.className="verdict think"; cv.textContent=`${income<cTight?"Tight":"Getting by"}: bills take ${Math.round(pct)}% of your pay. To be comfy, earn ${fmt0(cLo-income)} more per ${per}, or cut bills by ${fmt0(bills-income*0.5)}.`; }
-  else { cv.className="verdict ok"; cv.textContent=`🎉 You're in the comfy zone. Bills take ${Math.round(pct)}% of your pay, leaving room for fun and savings.`; }
+  else { cv.className="verdict ok"; cv.textContent=`You're in the comfy zone. Bills take ${Math.round(pct)}% of your pay, leaving room for fun and savings.`; }
   const yr = v => toPeriod(v,P,"annually");
   $("cGross").textContent = bills ? `Comfy before tax: about ${fmt0(grossFor(yr(cLo)))}–${fmt0(grossFor(yr(cHi)))} a year`
     + (income ? ` (you: about ${fmt0(grossFor(yr(income)))})` : "")
@@ -434,7 +457,7 @@ function render(){
   $("savePctLbl").textContent = `${pctSave}% · ${fmt0(saveP)} per ${PERIOD_WORD[P]}`;
   const gName = state.goal.name ? esc(state.goal.name) : "your goal";
   if(!state.goal.amount){ $("gTime").textContent=$("gDate").textContent=$("gFast").textContent="–"; }
-  else if(!need){ $("gTime").textContent="Done 🎉"; $("gDate").textContent="Now"; $("gFast").textContent="–"; }
+  else if(!need){ $("gTime").textContent="Done!"; $("gDate").textContent="Now"; $("gFast").textContent="–"; }
   else {
     $("gTime").textContent = saveDay>0 ? dur(need/saveDay) : "Never";
     $("gDate").textContent = saveDay>0 ? new Date(Date.now()+need/saveDay*864e5).toLocaleDateString("en-AU",{month:"short",year:"numeric"}) : "–";
@@ -458,9 +481,9 @@ function render(){
   else if(left<=0){ v.className="verdict no"; v.textContent=`Your bills are more than your pay right now, so there's nothing left to save or spend. Start by looking for a bill to cut.`; }
   else if(perDay<=0){ v.className="verdict think"; v.textContent=`You're saving everything that's left. Fastest way to ${gName}, but there's no guilt-free money. Try lowering the slider a bit.`; }
   else if(!tryAmt){ v.className="verdict ok"; v.textContent=`You have ${fmt(perDay)} a day (${fmt0(perWeek)} a week) to spend guilt-free.`; }
-  else if(tryAmt<=perDay){ v.className="verdict ok"; v.textContent=`✅ ${fmt(tryAmt)}: go for it. It's ${Math.round(tryAmt/perDay*100)}% of today's ${fmt(perDay)} guilt-free money.`; }
-  else if(tryAmt<=perWeek){ v.className="verdict think"; v.textContent=`🤔 ${fmt(tryAmt)} is more than one day's ${fmt(perDay)}, but fits in this week's ${fmt0(perWeek)}. Fine if you spend less on the other days.`; }
-  else { v.className="verdict no"; v.textContent=`✋ ${fmt(tryAmt)} is more than a whole week of guilt-free money (${fmt0(perWeek)}). Plan for it or save up first.`; }
+  else if(tryAmt<=perDay){ v.className="verdict ok"; v.textContent=`${fmt(tryAmt)}: go for it. It's ${Math.round(tryAmt/perDay*100)}% of today's ${fmt(perDay)} guilt-free money.`; }
+  else if(tryAmt<=perWeek){ v.className="verdict think"; v.textContent=`${fmt(tryAmt)} is more than one day's ${fmt(perDay)}, but fits in this week's ${fmt0(perWeek)}. Fine if you spend less on the other days.`; }
+  else { v.className="verdict no"; v.textContent=`${fmt(tryAmt)} is more than a whole week of guilt-free money (${fmt0(perWeek)}). Plan for it or save up first.`; }
   save();
 }
 function dur(days){
@@ -549,12 +572,12 @@ function importText(text){
   catch{ ioMsg("no","That doesn't look like Leftover data. Copy the whole text from Export on your other device."); return; }
   if(state.bills.length && !confirm(`Replace your current budget with the imported one (${data.bills.length} bills)?`)) return;
   state = data; syncInputs(); render();
-  ioMsg("ok",`✅ Imported ${data.bills.length} bill${data.bills.length===1?"":"s"}. Your budget is saved in this browser.`);
+  ioMsg("ok",`Imported ${data.bills.length} bill${data.bills.length===1?"":"s"}. Your budget is saved in this browser.`);
 }
 $("exportBtn").addEventListener("click",async()=>{
   const t = $("ioText"); t.value = exportText(); t.select();
-  try{ await navigator.clipboard.writeText(t.value); ioMsg("ok","✅ Copied. Send it to your other device (message, email, notes), then paste it into Import there."); }
-  catch{ try{ document.execCommand("copy"); ioMsg("ok","✅ Copied. Paste it into Import on your other device."); }
+  try{ await navigator.clipboard.writeText(t.value); ioMsg("ok","Copied. Send it to your other device (message, email, notes), then paste it into Import there."); }
+  catch{ try{ document.execCommand("copy"); ioMsg("ok","Copied. Paste it into Import on your other device."); }
          catch{ ioMsg("think","Select the text above and copy it, then paste it into Import on your other device."); } }
 });
 $("importBtn").addEventListener("click",()=>{
@@ -567,7 +590,7 @@ $("downloadBtn").addEventListener("click",()=>{
   a.href = URL.createObjectURL(new Blob([exportText()],{type:"application/json"}));
   a.download = `leftover-${new Date().toISOString().slice(0,10)}.json`;
   a.click(); setTimeout(()=>URL.revokeObjectURL(a.href),1000);
-  ioMsg("ok","✅ Downloaded. Open this file with Open file on your other device.");
+  ioMsg("ok","Downloaded. Open this file with Open file on your other device.");
 });
 $("openBtn").addEventListener("click",()=>$("ioFile").click());
 
