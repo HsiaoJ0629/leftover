@@ -100,6 +100,9 @@
   .gauge span.z:first-child{border-radius:99px 0 0 99px}.gauge span.z:last-child{border-radius:0 99px 99px 0}
   .pin{position:absolute;top:-24px;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;font-size:11px;font-weight:700;color:var(--ink);white-space:nowrap}
   .pin::after{content:"";width:3px;height:30px;background:var(--ink);border-radius:2px;margin-top:2px}
+  textarea{width:100%;font:12px/1.4 ui-monospace,SFMono-Regular,Consolas,monospace;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:#fff;color:var(--ink);resize:vertical}
+  textarea:focus{outline:2px solid var(--blue-500);outline-offset:-1px;border-color:transparent}
+  .io-btns{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:12px}
   footer{text-align:center;color:var(--muted);font-size:12px;padding:8px 16px 32px}
 
   @media (max-width:760px){
@@ -112,12 +115,44 @@
     .sweat.ef{grid-template-columns:1fr}
     .tiers{grid-template-columns:1fr 1fr}
     .tier.comfy{grid-column:1 / -1}
+    .io-btns{grid-template-columns:1fr 1fr}
+    .print-btn{padding:6px 10px}
+  }
+
+  /* Print: a clean summary on white paper */
+  .print-btn{margin-left:auto;border:1px solid rgba(255,255,255,.35);background:rgba(255,255,255,.12);color:#fff;font:inherit;font-size:13px;font-weight:600;padding:7px 12px;border-radius:999px;cursor:pointer}
+  .print-btn:hover{background:rgba(255,255,255,.22)}
+  .print-date{display:none}
+  @media print{
+    @page{margin:14mm}
+    *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+    body{background:#fff;font-size:12px}
+    .no-print,.x,#efGoal,#savePct,.seg button:not(.on){display:none !important}
+    header{background:none;color:var(--ink);padding:0 0 10px;border-bottom:2px solid var(--blue-600);margin-bottom:12px}
+    .wrap{max-width:none;padding:0}
+    .logo{background:var(--blue-600);color:#fff}
+    .print-date{display:inline;margin-left:auto;font-size:12px;font-weight:400;color:var(--muted)}
+    main{margin-top:0;padding-bottom:0}
+    .card{box-shadow:none;border:1px solid var(--line);padding:14px;margin-bottom:12px;break-inside:avoid}
+    .grid{display:block}.grid > .card{margin-bottom:12px}
+    .grid > .stack > * + *{margin-top:0}
+    .bill{break-inside:avoid;padding:6px 0}
+    .seg{margin:8px 0 0;border:0;background:none}
+    .seg button.on{box-shadow:none}
+    input,select{border:0;padding:2px 0;background:none;appearance:none;-webkit-appearance:none;font-weight:600}
+    .money input{padding-left:12px}.money::before{left:0}
+    input::placeholder{color:transparent}
+    .hero{padding:14px}
+    .hero .big{font-size:34px}
+    footer{padding:4px 0 0}
   }
 </style>
 </head>
 <body>
 <header>
-  <div class="wrap brand"><div class="logo">$</div> Leftover <span style="font-weight:400;font-size:13px;opacity:.75;margin-left:4px">· bills, savings &amp; guilt-free money</span></div>
+  <div class="wrap brand"><div class="logo">$</div> Leftover <span style="font-weight:400;font-size:13px;opacity:.75;margin-left:4px">· bills, savings &amp; guilt-free money</span>
+    <span class="print-date" id="printDate"></span>
+    <button class="print-btn no-print" type="button" id="printBtn">🖨️ Print</button></div>
 </header>
 
 <main class="wrap">
@@ -147,7 +182,7 @@
         </div>
       </div>
 
-      <div class="card">
+      <div class="card no-print">
         <h2>2. Add a regular bill</h2>
         <form id="billForm" class="stack">
           <div><label>Quick add</label><div class="quick" id="quick"></div></div>
@@ -160,7 +195,7 @@
           <button class="btn" type="submit">Add bill</button>
         </form>
       </div>
-      <button class="btn ghost" id="sampleBtn">Load example budget</button>
+      <button class="btn ghost no-print" id="sampleBtn">Load example budget</button>
     </section>
 
     <!-- BILLS LIST -->
@@ -234,8 +269,23 @@
     <div class="verdict" id="verdict"></div>
     <div class="note">A rule of thumb, not financial advice.</div>
   </section>
+
+  <!-- EXPORT / IMPORT -->
+  <section class="card no-print">
+    <h2>Move to another device</h2>
+    <p class="muted" style="margin:-6px 0 14px;font-size:13px">Your budget is saved only in this browser. To use it somewhere else, export it here, then paste it into <b>Import</b> on your other device.</p>
+    <textarea id="ioText" rows="5" spellcheck="false" placeholder="Click Export to get your data, or paste exported data here and click Import."></textarea>
+    <div class="io-btns">
+      <button class="btn" type="button" id="exportBtn">Export &amp; copy</button>
+      <button class="btn ghost" type="button" id="importBtn">Import</button>
+      <button class="btn ghost" type="button" id="downloadBtn">Download file</button>
+      <button class="btn ghost" type="button" id="openBtn">Open file</button>
+      <input type="file" id="ioFile" accept=".json,application/json,text/plain" hidden>
+    </div>
+    <div class="verdict" id="ioMsg" hidden></div>
+  </section>
 </main>
-<footer>Prototype · Figures are estimates. Saved only in this browser.</footer>
+<footer>Prototype · Figures are estimates. Saved only in this browser. Use Export to move it to another device.</footer>
 
 <script>
 const FREQ = { // occurrences per year
@@ -470,7 +520,64 @@ $("billForm").addEventListener("submit",e=>{
 });
 $("sampleBtn").addEventListener("click",()=>{
   state = {...JSON.parse(JSON.stringify(SAMPLE)),period:state.period,tryAmt:state.tryAmt,efMonths:state.efMonths};
-  $("incAmt").value=state.income.amount; $("incFreq").value=state.income.freq; fillGoal(); render();
+  syncInputs(); render();
+});
+function syncInputs(){
+  $("incAmt").value = state.income.amount || ""; $("incFreq").value = state.income.freq;
+  $("tryAmt").value = state.tryAmt || ""; fillGoal();
+}
+
+// Export / import: plain JSON so it can be copied between devices
+function exportText(){ return JSON.stringify({app:"leftover",version:1,...state}); }
+function normalize(d){ // validate imported data and fill in anything missing
+  if(!d || typeof d!=="object" || !Array.isArray(d.bills)) throw new Error("bad");
+  const num = v => Math.max(0,+v||0), g = d.goal||{};
+  return {
+    income:{amount:num(d.income&&d.income.amount), freq:FREQ[d.income&&d.income.freq] ? d.income.freq : "fortnightly"},
+    bills:d.bills.filter(b=>b&&b.name).map(b=>({name:String(b.name).slice(0,100),amount:num(b.amount),
+      freq:FREQ[b.freq]?b.freq:"monthly", cat:CATS[b.cat]?b.cat:"other"})),
+    period:PERIODS.includes(d.period) ? d.period : "fortnightly",
+    goal:{name:String(g.name||"").slice(0,100), amount:num(g.amount), have:num(g.have), pct:Math.min(100,num(g.pct ?? 50))},
+    efMonths:[3,6].includes(+d.efMonths) ? +d.efMonths : 3,
+    tryAmt:d.tryAmt==null ? 10 : num(d.tryAmt)
+  };
+}
+function ioMsg(kind,text){ const m=$("ioMsg"); m.hidden=false; m.className="verdict "+kind; m.textContent=text; }
+function importText(text){
+  let data;
+  try{ data = normalize(JSON.parse(text.trim())); }
+  catch{ ioMsg("no","That doesn't look like Leftover data. Copy the whole text from Export on your other device."); return; }
+  if(state.bills.length && !confirm(`Replace your current budget with the imported one (${data.bills.length} bills)?`)) return;
+  state = data; syncInputs(); render();
+  ioMsg("ok",`✅ Imported ${data.bills.length} bill${data.bills.length===1?"":"s"}. Your budget is saved in this browser.`);
+}
+$("exportBtn").addEventListener("click",async()=>{
+  const t = $("ioText"); t.value = exportText(); t.select();
+  try{ await navigator.clipboard.writeText(t.value); ioMsg("ok","✅ Copied. Send it to your other device (message, email, notes), then paste it into Import there."); }
+  catch{ try{ document.execCommand("copy"); ioMsg("ok","✅ Copied. Paste it into Import on your other device."); }
+         catch{ ioMsg("think","Select the text above and copy it, then paste it into Import on your other device."); } }
+});
+$("importBtn").addEventListener("click",()=>{
+  const t = $("ioText").value;
+  if(!t.trim()){ ioMsg("think","Paste the exported text into the box first."); $("ioText").focus(); return; }
+  importText(t);
+});
+$("downloadBtn").addEventListener("click",()=>{
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(new Blob([exportText()],{type:"application/json"}));
+  a.download = `leftover-${new Date().toISOString().slice(0,10)}.json`;
+  a.click(); setTimeout(()=>URL.revokeObjectURL(a.href),1000);
+  ioMsg("ok","✅ Downloaded. Open this file with Open file on your other device.");
+});
+$("openBtn").addEventListener("click",()=>$("ioFile").click());
+
+// Print: stamp the date, then use the print stylesheet
+const stampDate = () => $("printDate").textContent = "Printed " + new Date().toLocaleDateString("en-AU",{day:"numeric",month:"short",year:"numeric"});
+window.addEventListener("beforeprint",stampDate);
+$("printBtn").addEventListener("click",()=>{ stampDate(); window.print(); });
+$("ioFile").addEventListener("change",async e=>{
+  const f = e.target.files[0]; if(!f) return;
+  const text = await f.text(); $("ioText").value = text; importText(text); e.target.value = "";
 });
 render();
 </script>

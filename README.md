@@ -15,10 +15,12 @@ Leftover is a simple budget calculator. Enter your take-home pay and your regula
 - **Savings goal:** set a goal and choose how much of your leftover to save. You see how long it will take, the target date, and the fastest it could happen.
 - **Guilt-free spending:** after bills and savings, how much you can spend per day. Type in a purchase (like a $10 snack) and see whether it fits. Based on Ramit Sethi's *Conscious Spending Plan*.
 - **Example budget:** load sample numbers to see how it all works.
+- **Print:** a clean, printer-friendly summary of your budget (or save it as a PDF).
+- **Export & import:** copy your budget as JSON text (or download it as a file) and import it on another device.
 
 ## Privacy
 
-Everything runs in your browser. Your numbers are saved only in your browser's local storage and are never sent anywhere.
+Everything runs in your browser. Your numbers are saved only in your browser's local storage and are never sent anywhere. To move your budget to another device, use **Export** and **Import**.
 
 ## Run it locally
 
