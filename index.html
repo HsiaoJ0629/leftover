@@ -77,7 +77,7 @@
   .stack > * + *{margin-top:12px}
 
   /* Bills */
-  .bill{display:grid;grid-template-columns:36px 1fr auto auto;gap:12px;align-items:center;padding:12px 0;border-bottom:1px solid var(--line)}
+  .bill{display:grid;grid-template-columns:36px 1fr auto auto auto;gap:4px 12px;cursor:pointer;align-items:center;padding:12px 0;border-bottom:1px solid var(--line)}
   .bill:last-child{border-bottom:0}
   .ico{width:36px;height:36px;border-radius:10px;display:grid;place-items:center;font-size:18px}
   .bill .name{font-weight:600}
@@ -86,6 +86,11 @@
   .bill .amt small{display:block;font-weight:400;color:var(--muted);font-size:12px}
   .x{border:0;background:transparent;color:var(--muted);cursor:pointer;font-size:20px;width:44px;height:44px;margin-right:-8px;border-radius:10px}
   .x:hover{background:var(--bad-bg);color:var(--bad)}
+  .x.ed{margin-right:0;font-size:16px}.x.ed:hover{background:var(--blue-100);color:var(--accent-text)}
+  .bill:hover .name{color:var(--accent-text)}
+  .bill.sum{grid-template-columns:36px 1fr auto}
+  [hidden]{display:none !important}
+  .bill.editing{background:var(--blue-50);box-shadow:-8px 0 0 var(--blue-50),8px 0 0 var(--blue-50)}
   .empty{text-align:center;color:var(--muted);padding:24px 0}
   .cats{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
   .chip{font-size:13px;padding:5px 10px;border-radius:999px;background:var(--blue-50);color:var(--ink);display:flex;gap:6px;align-items:center}
@@ -158,6 +163,7 @@
     .grid{display:block}.grid > .card{margin-bottom:12px}
     .grid > .stack > * + *{margin-top:0}
     .bill{break-inside:avoid;padding:6px 0}
+    #bills{display:block !important}#billsSum{display:none !important}
     .seg{margin:8px 0 0;border:0;background:none}
     .seg button.on{box-shadow:none}
     input,select{border:0;padding:2px 0;background:none;appearance:none;-webkit-appearance:none;font-weight:600}
@@ -209,7 +215,7 @@
       </div>
 
       <div class="card no-print">
-        <h2>2. Add a regular bill</h2>
+        <h2 id="billFormTitle">2. Add a regular bill</h2>
         <form id="billForm" class="stack">
           <div><label>Quick add</label><div class="quick" id="quick"></div></div>
           <div><label for="bName">What is it?</label><input id="bName" placeholder="e.g. Rent, Netflix, Car rego" required></div>
@@ -218,7 +224,8 @@
             <div><label for="bFreq">How often</label><select id="bFreq"></select></div>
           </div>
           <div><label for="bCat">Category</label><select id="bCat"></select></div>
-          <button class="btn" type="submit">Add bill</button>
+          <button class="btn" type="submit" id="billSubmit">Add bill</button>
+          <button class="btn ghost" type="button" id="billCancel" hidden>Cancel</button>
         </form>
       </div>
       <button class="btn ghost no-print" id="sampleBtn">Load example budget</button>
@@ -227,9 +234,11 @@
     <!-- BILLS LIST -->
     <section class="card">
       <div class="head-row">
-        <h2>Regular bills</h2>
+        <h2>Regular bills <span class="muted" id="billCount" style="font-weight:400">(0)</span></h2>
         <span class="muted" style="font-size:13px" id="listHint">shown per fortnight</span>
       </div>
+      <div class="seg no-print" id="viewSeg" style="margin:0 0 8px"><button type="button" data-v="summary">Summary</button><button type="button" data-v="details">Details</button></div>
+      <div id="billsSum"></div>
       <div id="bills"></div>
       <div class="cats" id="cats"></div>
     </section>
@@ -397,7 +406,8 @@ function render(){
   $("sBills").textContent = fmt0(bills);
   $("sPct").textContent = Math.round(pct)+"%";
   $("sPct").style.color = pct>80?"var(--bad)":pct>60?"var(--warn)":"var(--good)";
-  $("listHint").textContent = "shown per " + PERIOD_WORD[P];
+  $("billCount").textContent = `(${state.bills.length})`;
+  $("listHint").textContent ="shown per " + PERIOD_WORD[P];
   document.querySelectorAll("#periodSeg button").forEach(b=>b.classList.toggle("on",b.dataset.p===P));
 
   // meter split by category
@@ -410,15 +420,29 @@ function render(){
   // bill list
   $("bills").innerHTML = state.bills.length ? state.bills.map((b,i)=>{
     const c = CATS[b.cat];
-    return `<div class="bill">
+    return `<div class="bill${i===editIdx?" editing":""}" data-i="${i}">
       <div class="ico" style="background:${c.color}26;color:${c.color}">${c.icon}</div>
       <div><div class="name">${esc(b.name)}</div><div class="meta">${fmt(b.amount)} ${FREQ[b.freq].label.toLowerCase()} · ${c.label}</div></div>
       <div class="amt">${fmt(toPeriod(b.amount,b.freq,P))}<small>/${PERIOD_WORD[P]}</small></div>
-      <button class="x" data-i="${i}" aria-label="Remove ${esc(b.name)}">×</button>
+      <button class="x ed" type="button" aria-label="Edit ${esc(b.name)}">${svg('<path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/>')}</button>
+      <button class="x" type="button" data-i="${i}" aria-label="Remove ${esc(b.name)}">×</button>
     </div>`;}).join("")
     : `<div class="empty">No bills yet.<br>Add your rent, phone, insurance…</div>`;
 
-  $("cats").innerHTML = Object.entries(byCat).sort((a,b)=>b[1]-a[1]).map(([c,v])=>
+  // summary view (one row per category) for long lists, details for the full list
+  const view = !state.bills.length ? "details" : billView || (state.bills.length>6 ? "summary" : "details");
+  const cnt = {}; state.bills.forEach(b=>cnt[b.cat]=(cnt[b.cat]||0)+1);
+  $("billsSum").innerHTML = Object.entries(byCat).sort((a,b)=>b[1]-a[1]).map(([c,v])=>{
+    const k = CATS[c];
+    return `<div class="bill sum" data-v="details" title="Show details">
+      <div class="ico" style="background:${k.color}26;color:${k.color}">${k.icon}</div>
+      <div><div class="name">${k.label}</div><div class="meta">${cnt[c]} bill${cnt[c]===1?"":"s"}</div></div>
+      <div class="amt">${fmt(v)}<small>/${PERIOD_WORD[P]}</small></div></div>`; }).join("");
+  $("billsSum").hidden = view!=="summary"; $("bills").hidden = view!=="details";
+  $("viewSeg").hidden = !state.bills.length;
+  document.querySelectorAll("#viewSeg button").forEach(b=>b.classList.toggle("on",b.dataset.v===view));
+
+  $("cats").innerHTML =Object.entries(byCat).sort((a,b)=>b[1]-a[1]).map(([c,v])=>
     `<span class="chip"><span class="dot" style="background:${CATS[c].color}"></span>${CATS[c].label} ${fmt0(v)}</span>`).join("");
 
   // comfy income: 50/30/20 rule, worked back from bills
@@ -543,15 +567,37 @@ $("goalHave").addEventListener("input",e=>{state.goal.have=+e.target.value||0;re
 $("savePct").addEventListener("input",e=>{state.goal.pct=+e.target.value;render();});
 $("tryAmt").addEventListener("input",e=>{state.tryAmt=+e.target.value||0;render();});
 $("periodSeg").addEventListener("click",e=>{ if(e.target.dataset.p){state.period=e.target.dataset.p;render();} });
-$("bills").addEventListener("click",e=>{ if(e.target.dataset.i!=null){state.bills.splice(+e.target.dataset.i,1);render();} });
+let billView = null; // "summary" | "details" | null = automatic by list length
+$("viewSeg").addEventListener("click",e=>{ if(e.target.dataset.v){ billView=e.target.dataset.v; render(); } });
+$("billsSum").addEventListener("click",()=>{ billView="details"; render(); });
+let editIdx = null; // index of the bill being edited, or null when adding
+function endEdit(){
+  editIdx = null; $("billForm").reset();
+  document.querySelectorAll("#quick button.on").forEach(b=>b.classList.remove("on"));
+  $("bFreq").value="monthly"; $("bCat").value="other";
+  $("billSubmit").textContent="Add bill"; $("billCancel").hidden=true; $("billFormTitle").textContent="2. Add a regular bill";
+}
+function startEdit(i){
+  const b = state.bills[i]; if(!b) return;
+  editIdx = i; billView = "details"; $("bName").value=b.name; $("bAmt").value=b.amount; $("bFreq").value=b.freq; $("bCat").value=b.cat;
+  $("billSubmit").textContent="Save changes"; $("billCancel").hidden=false; $("billFormTitle").textContent="Edit bill";
+  $("billForm").scrollIntoView({block:"center"}); $("bAmt").focus(); render();
+}
+$("bills").addEventListener("click",e=>{
+  const del = e.target.closest(".x:not(.ed)");
+  if(del){ state.bills.splice(+del.dataset.i,1); endEdit(); render(); return; }
+  const row = e.target.closest(".bill"); if(row) startEdit(+row.dataset.i);
+});
+$("billCancel").addEventListener("click",()=>{ endEdit(); render(); });
 $("billForm").addEventListener("submit",e=>{
   e.preventDefault();
-  state.bills.push({name:$("bName").value.trim(),amount:+$("bAmt").value||0,freq:$("bFreq").value,cat:$("bCat").value});
-  e.target.reset(); document.querySelectorAll("#quick button.on").forEach(b=>b.classList.remove("on")); $("bFreq").value="monthly"; $("bCat").value="other"; $("bName").focus(); render();
+  const bill = {name:$("bName").value.trim(),amount:+$("bAmt").value||0,freq:$("bFreq").value,cat:$("bCat").value};
+  if(editIdx!=null) state.bills[editIdx] = bill; else state.bills.push(bill);
+  endEdit(); $("bName").focus(); render();
 });
 $("sampleBtn").addEventListener("click",()=>{
   state = {...JSON.parse(JSON.stringify(SAMPLE)),period:state.period,tryAmt:state.tryAmt,efMonths:state.efMonths};
-  syncInputs(); render();
+  endEdit(); syncInputs(); render();
 });
 function syncInputs(){
   $("incAmt").value = state.income.amount || ""; $("incFreq").value = state.income.freq;
@@ -579,7 +625,7 @@ function importText(text){
   try{ data = normalize(JSON.parse(text.trim())); }
   catch{ ioMsg("no","That doesn't look like Leftover data. Copy the whole text from Export on your other device."); return; }
   if(state.bills.length && !confirm(`Replace your current budget with the imported one (${data.bills.length} bills)?`)) return;
-  state = data; syncInputs(); render();
+  state = data; endEdit(); syncInputs(); render();
   ioMsg("ok",`Imported ${data.bills.length} bill${data.bills.length===1?"":"s"}. Your budget is saved in this browser.`);
 }
 $("exportBtn").addEventListener("click",async()=>{
