@@ -5,311 +5,433 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Leftover</title>
 <meta name="description" content="Simple bills and savings calculator. General information only, not financial advice. Results are estimates.">
+<meta name="theme-color" content="#0B2A6B">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='9' fill='%231E5BD8'/%3E%3Ccircle cx='16' cy='16' r='8' fill='none' stroke='%23fff' stroke-opacity='.45' stroke-width='4'/%3E%3Ccircle cx='16' cy='16' r='8' fill='none' stroke='%23fff' stroke-width='4' stroke-dasharray='17 50.3' stroke-linecap='round' transform='rotate(-90 16 16)'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
   :root{
     --blue-900:#0B2A6B; --blue-700:#1546B8; --blue-600:#1E5BD8; --blue-500:#3B78F0;
-    --blue-100:#E6EEFD; --blue-50:#F3F7FE;
-    --ink:#0F1B33; --muted:#5B6B86; --line:#E3E9F3; --bg:#F5F8FC; --card:#FFFFFF;
-    --good:#11875A; --bad:#C8352B; --warn:#B7791F;
-    --radius:16px; --shadow:0 1px 2px rgba(15,27,51,.06),0 8px 24px rgba(15,27,51,.06);
-    --accent-text:#1546B8; --input-bg:#fff; --ok-bg:#E7F6EE; --warn-bg:#FDF4E3; --bad-bg:#FDECEA;
+    --blue-100:#DFE9FC; --blue-50:#F2F6FE;
+    --ink:#0F1B33; --muted:#566582; --line:#E1E7F0; --bg:#F3F6FA; --card:#FFFFFF;
+    --accent-text:#1546B8; --input-bg:#fff;
+    /* Status colours: text / icon colour, tinted background */
+    --good:#0E7A50; --ok-bg:#E8F6EF;
+    --warn:#8A5B00; --warn-bg:#FFF4D2;
+    --bad:#B42318;  --bad-bg:#FDECEA;
+    --info:#1546B8; --info-bg:#EEF4FF;
+    /* Comfy-income zones (gauge, zone cards, hero pill) */
+    --z-short:#EE9A92; --z-tight:#EFC25E; --z-by:#9DBBF3; --z-comfy:#6FC49A;
+    --hdr-a:#0B2A6B; --hdr-b:#1E5BD8;
+    --ico-tint:#000; --ico-amt:0%;
+    --radius:14px; --shadow:0 1px 2px rgba(15,27,51,.05),0 6px 20px rgba(15,27,51,.05);
     color-scheme:light;
   }
   @media screen and (prefers-color-scheme:dark){
     :root{
-      --ink:#E8EEFA; --muted:#9AA9C4; --line:#26324A; --bg:#0B1220; --card:#131C30;
-      --blue-50:#18243D; --blue-100:#243456; --blue-500:#6A9BFF;
-      --good:#4CCB94; --bad:#FF7A70; --warn:#E8B04A;
-      --accent-text:#8FB3FF; --input-bg:#0F1729; --ok-bg:#12302A; --warn-bg:#33290F; --bad-bg:#3A1A1A;
-      --shadow:0 1px 2px rgba(0,0,0,.4),0 8px 24px rgba(0,0,0,.35);
+      --ink:#E8EEFA; --muted:#9CABC6; --line:#25314A; --bg:#0A111E; --card:#121B2E;
+      --blue-50:#18233B; --blue-100:#26375A; --blue-500:#6A9BFF;
+      --accent-text:#8FB3FF; --input-bg:#0D1526;
+      --good:#56D19C; --ok-bg:#0F2A20;
+      --warn:#F5C04E; --warn-bg:#33270A;
+      --bad:#FF8A80;  --bad-bg:#35181A;
+      --info:#8FB3FF; --info-bg:#172440;
+      --z-short:#C2554D; --z-tight:#C9952B; --z-by:#4B74C4; --z-comfy:#2E9A6C;
+      --hdr-a:#0A1836; --hdr-b:#153478;
+      --ico-tint:#fff; --ico-amt:45%;
+      --shadow:0 1px 2px rgba(0,0,0,.4),0 8px 24px rgba(0,0,0,.3);
       color-scheme:dark;
     }
   }
   *{box-sizing:border-box}
-  button,input,select,textarea{transition:background-color .18s,border-color .18s,color .18s,box-shadow .18s}
+  [hidden]{display:none !important}
+  button,input,select,textarea{transition:background-color .15s,border-color .15s,color .15s,box-shadow .15s}
   button:focus-visible,summary:focus-visible{outline:2px solid var(--blue-500);outline-offset:2px}
   .i{width:1.1em;height:1.1em;flex:none;vertical-align:-.15em}
   @media (prefers-reduced-motion:reduce){*{transition:none !important;animation:none !important}}
-  body{margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:var(--bg);color:var(--ink);font-size:15px;line-height:1.45}
-  header{background:linear-gradient(135deg,var(--blue-900),var(--blue-600));color:#fff;padding:18px 16px 96px}
-  .wrap{max-width:960px;margin:0 auto;padding:0 16px}
-  .brand{display:flex;align-items:center;gap:10px;font-weight:700;font-size:18px}
-  .logo{width:32px;height:32px;border-radius:9px;background:rgba(255,255,255,.15);display:grid;place-items:center}
-  main{margin-top:-80px;padding-bottom:48px}
-  .card{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);padding:20px;margin-bottom:16px}
-  h2{font-size:16px;margin:0 0 14px;font-weight:600}
+  body{margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:var(--bg);color:var(--ink);font-size:15px;line-height:1.5;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:1000px;margin:0 auto;padding:0 16px}
   .muted{color:var(--muted)}
+  .num{font-variant-numeric:tabular-nums}
+
+  /* Header */
+  .top{background:linear-gradient(135deg,var(--hdr-a),var(--hdr-b));color:#fff;padding:16px 0 92px}
+  .top-row{display:flex;align-items:center;gap:12px}
+  .brand{display:flex;align-items:center;gap:10px;margin:0;font-size:19px;font-weight:700;letter-spacing:-.01em}
+  .logo{width:32px;height:32px;flex:none}
+  .logo .lg-bg{fill:rgba(255,255,255,.14)}.logo .lg-ring{stroke:rgba(255,255,255,.4)}.logo .lg-slice{stroke:#fff}
+  .tagline{font-size:13px;opacity:.8;padding-left:12px;border-left:1px solid rgba(255,255,255,.3)}
+  .print-btn{margin-left:auto;border:1px solid rgba(255,255,255,.3);background:rgba(255,255,255,.1);color:#fff;font:inherit;font-size:13px;font-weight:600;padding:8px 14px;min-height:36px;border-radius:10px;cursor:pointer;display:inline-flex;gap:6px;align-items:center}
+  .print-btn:hover{background:rgba(255,255,255,.2)}
+  .print-date{display:none}
+
+  /* Cards and headings */
+  main{margin-top:-76px;padding-bottom:40px}
+  main > * + *{margin-top:16px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:20px}
+  h2{font-size:16px;line-height:1.3;margin:0;font-weight:600;letter-spacing:-.005em;display:flex;align-items:center;gap:10px}
+  .step{width:24px;height:24px;flex:none;border-radius:50%;background:var(--blue-600);color:#fff;font-size:12px;font-weight:700;display:grid;place-items:center}
+  .card-head{display:flex;justify-content:space-between;align-items:center;gap:8px 12px;flex-wrap:wrap;margin-bottom:14px}
+  .hint{font-size:13px;color:var(--muted)}
+  .desc{margin:-6px 0 16px;font-size:13.5px;color:var(--muted);max-width:100ch}
+  .count{font-weight:400;color:var(--muted)}
+
+  /* Notice (disclaimer) */
+  .card.notice{padding:0;background:var(--warn-bg);border-color:color-mix(in srgb,var(--warn) 30%,transparent);font-size:13px}
+  .notice summary{list-style:none;cursor:pointer;display:flex;gap:10px;align-items:flex-start;padding:12px 16px;border-radius:var(--radius)}
+  .notice summary::-webkit-details-marker{display:none}
+  .notice summary > .i{color:var(--warn);width:18px;height:18px;margin-top:1px}
+  .notice-title{flex:1}
+  .notice[open] .notice-short,.notice[open] .when-closed,.notice:not([open]) .when-open{display:none}
+  .notice-toggle{flex:none;font-weight:600;color:var(--warn);display:inline-flex;align-items:center;gap:4px;white-space:nowrap}
+  .notice-toggle .i{transition:transform .15s}.notice[open] .notice-toggle .i{transform:rotate(180deg)}
+  .notice ul{margin:0;padding:0 16px 14px 44px;list-style:none;display:grid;gap:6px}
+  .notice li b{color:var(--warn)}
 
   /* Hero */
-  .hero{text-align:center;padding:24px 20px}
-  .hero .label{color:var(--muted);font-size:13px;text-transform:uppercase;letter-spacing:.06em;font-weight:600}
-  .hero .big{font-size:44px;font-weight:700;letter-spacing:-.02em;margin:6px 0 2px;color:var(--accent-text);font-variant-numeric:tabular-nums}
+  .hero{text-align:center;padding:26px 20px 20px}
+  .eyebrow{color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:.08em;font-weight:600}
+  .hero .big{font-size:50px;line-height:1.1;font-weight:700;letter-spacing:-.025em;margin:6px 0 4px;color:var(--accent-text);font-variant-numeric:tabular-nums}
   .hero .big.neg{color:var(--bad)}
   .hero .sub{color:var(--muted);font-size:14px}
-  .seg{display:inline-flex;background:var(--blue-50);border:1px solid var(--blue-100);border-radius:999px;padding:4px;margin:16px 0 4px;flex-wrap:wrap;justify-content:center}
-  .seg button{border:0;background:transparent;padding:10px 14px;min-height:40px;border-radius:999px;font:inherit;font-size:13px;font-weight:600;color:var(--muted);cursor:pointer}
-  .seg button.on{background:var(--blue-600);color:#fff;box-shadow:0 2px 6px rgba(30,91,216,.35)}
+  .seg{display:inline-flex;background:var(--blue-50);border:1px solid var(--blue-100);border-radius:12px;padding:3px;flex-wrap:wrap;justify-content:center}
+  .seg button{border:0;background:transparent;padding:7px 14px;min-height:36px;border-radius:9px;font:inherit;font-size:13px;font-weight:600;color:var(--muted);cursor:pointer}
+  .seg button:hover{color:var(--ink)}
+  .seg button.on{background:var(--blue-600);color:#fff;box-shadow:0 1px 3px rgba(30,91,216,.4)}
+  .hero .seg{margin-top:16px}
   .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:18px}
-  .stat{background:var(--blue-50);border-radius:12px;padding:12px}
-  .stat .k{font-size:12px;color:var(--muted)}
-  .stat .v{font-weight:700;font-size:17px;font-variant-numeric:tabular-nums}
-  .meter{height:10px;border-radius:99px;background:var(--blue-100);overflow:hidden;margin-top:18px;display:flex}
-  .meter span{display:block;height:100%}
-  .legend{display:flex;justify-content:space-between;font-size:12px;color:var(--muted);margin-top:6px}
+  .stat{background:var(--blue-50);border-radius:12px;padding:12px;min-width:0}
+  .stat .k{font-size:12px;color:var(--muted);font-weight:500}
+  .stat .v{font-weight:700;font-size:19px;line-height:1.3;font-variant-numeric:tabular-nums}
+  .stat .s{font-size:12px;color:var(--muted);min-height:20px;margin-top:2px}
+  .pill{display:inline-flex;align-items:center;gap:5px;font-size:11.5px;font-weight:600;padding:1px 8px;border-radius:999px;background:var(--p-bg);color:var(--p-fg)}
+  .pill::before{content:"";width:6px;height:6px;border-radius:50%;background:currentColor}
+  .pill.short{--p-bg:var(--bad-bg);--p-fg:var(--bad)}.pill.tight{--p-bg:var(--warn-bg);--p-fg:var(--warn)}
+  .pill.by{--p-bg:var(--info-bg);--p-fg:var(--info)}.pill.comfy{--p-bg:var(--ok-bg);--p-fg:var(--good)}
+  .meter-wrap{position:relative;margin-top:18px}
+  .meter-wrap.has-tick{margin-top:36px}
+  .meter{height:10px;border-radius:99px;background:var(--blue-100);overflow:hidden;display:flex;gap:2px}
+  .meter span{display:block;height:100%;min-width:0}
+  .tick{position:absolute;top:-4px;bottom:-4px;width:2px;margin-left:-1px;border-radius:2px;background:var(--ink)}
+  .tick::before{content:"Comfy limit: 50% of pay";position:absolute;bottom:100%;left:50%;transform:translateX(-50%);margin-bottom:3px;font-size:11px;font-weight:500;color:var(--muted);white-space:nowrap}
+  .legend{display:flex;justify-content:space-between;gap:12px;font-size:12px;color:var(--muted);margin-top:8px}
+  .legend b{color:var(--ink);font-weight:600;font-variant-numeric:tabular-nums}
 
-  /* Grid */
+  /* Forms */
   .grid{display:grid;grid-template-columns:1fr 1.4fr;gap:16px}
-  .grid > .card{margin-bottom:0}
-  label{display:block;font-size:13px;font-weight:500;color:var(--muted);margin-bottom:6px}
-  input,select{width:100%;font:inherit;padding:11px 12px;min-height:44px;border:1px solid var(--line);border-radius:10px;background:var(--input-bg);color:var(--ink)}
-  input:hover,select:hover{border-color:var(--blue-500)}
-  input:focus,select:focus{outline:2px solid var(--blue-500);outline-offset:-1px;border-color:transparent}
+  .col{display:grid;gap:16px;align-content:start}
+  .stack > * + *{margin-top:12px}
   .row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  label,.label{display:block;font-size:13px;font-weight:500;color:var(--muted);margin-bottom:6px}
+  input,select{width:100%;font:inherit;padding:10px 12px;min-height:44px;border:1px solid var(--line);border-radius:10px;background:var(--input-bg);color:var(--ink)}
+  input::placeholder,textarea::placeholder{color:var(--muted);opacity:.7}
+  input:hover,select:hover{border-color:var(--blue-500)}
+  input:focus,select:focus,textarea:focus{outline:2px solid var(--blue-500);outline-offset:-1px;border-color:transparent}
+  input[type=number]{-moz-appearance:textfield;appearance:textfield}
+  input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
+  select{appearance:none;-webkit-appearance:none;padding-right:34px;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%237B8AA5' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center}
+  input[type=range]{padding:0;border:0;background:none;min-height:32px;accent-color:var(--blue-600);cursor:pointer}
+  input[type=range]:focus{outline:0}input[type=range]:focus-visible{outline:2px solid var(--blue-500);outline-offset:2px;border-radius:8px}
   .money{position:relative}.money::before{content:"$";position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--muted)}
   .money input{padding-left:24px}
-  .btn{border:0;background:var(--blue-600);color:#fff;font:inherit;font-weight:600;padding:11px 16px;min-height:44px;border-radius:10px;cursor:pointer;width:100%}
-  .btn:active,.seg button:active,.quick button:active{transform:scale(.98)}
+  textarea{width:100%;font:12px/1.4 ui-monospace,SFMono-Regular,Consolas,monospace;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:var(--input-bg);color:var(--ink);resize:vertical}
+  .btn{border:1px solid transparent;background:var(--blue-600);color:#fff;font:inherit;font-weight:600;padding:10px 16px;min-height:44px;border-radius:10px;cursor:pointer;width:100%}
   .btn:hover{background:var(--blue-700)}
-  .btn.ghost{background:transparent;color:var(--blue-600);border:1px solid var(--blue-100)}
+  .btn:active,.seg button:active,.quick button:active{transform:scale(.98)}
+  .btn.ghost{background:transparent;color:var(--accent-text);border-color:var(--blue-100)}
   .btn.ghost:hover{background:var(--blue-50)}
-  .stack > * + *{margin-top:12px}
-
-  /* Bills */
-  .bill{display:grid;grid-template-columns:36px 1fr auto auto auto;gap:4px 12px;cursor:pointer;align-items:center;padding:12px 0;border-bottom:1px solid var(--line)}
-  .bill:last-child{border-bottom:0}
-  .ico{width:36px;height:36px;border-radius:10px;display:grid;place-items:center;font-size:18px}
-  .bill .name{font-weight:600}
-  .bill .meta{font-size:12px;color:var(--muted)}
-  .bill .amt{text-align:right;font-variant-numeric:tabular-nums;font-weight:600}
-  .bill .amt small{display:block;font-weight:400;color:var(--muted);font-size:12px}
-  .x{border:0;background:transparent;color:var(--muted);cursor:pointer;font-size:20px;width:44px;height:44px;margin-right:-8px;border-radius:10px}
-  .x:hover{background:var(--bad-bg);color:var(--bad)}
-  .x.ed{margin-right:0;font-size:16px}.x.ed:hover{background:var(--blue-100);color:var(--accent-text)}
-  .bill:hover .name{color:var(--accent-text)}
-  .bill.sum{grid-template-columns:36px 1fr auto}
-  [hidden]{display:none !important}
-  .bill.editing{background:var(--blue-50);box-shadow:-8px 0 0 var(--blue-50),8px 0 0 var(--blue-50)}
-  .empty{text-align:center;color:var(--muted);padding:24px 0}
-  .cats{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
-  .chip{font-size:13px;padding:5px 10px;border-radius:999px;background:var(--blue-50);color:var(--ink);display:flex;gap:6px;align-items:center}
-  .dot{width:8px;height:8px;border-radius:50%}
+  .btn.link{background:none;border:0;width:auto;min-height:36px;padding:6px 10px;color:var(--accent-text);font-size:13.5px}
+  .btn.link:hover{background:var(--blue-50)}
+  .center{text-align:center}
   .quick{display:flex;flex-wrap:wrap;gap:6px}
-  .quick button{border:1px solid var(--blue-100);background:var(--blue-50);color:var(--accent-text);font:inherit;font-size:13px;font-weight:500;padding:8px 12px;border-radius:999px;cursor:pointer;display:inline-flex;gap:6px;align-items:center}
+  .quick button{border:1px solid var(--blue-100);background:var(--blue-50);color:var(--accent-text);font:inherit;font-size:12.5px;font-weight:500;padding:6px 10px;border-radius:999px;cursor:pointer;display:inline-flex;gap:5px;align-items:center}
   .quick button:hover{background:var(--blue-100)}
   .quick button.on{background:var(--blue-600);border-color:var(--blue-600);color:#fff}
-  .disclaimer{display:flex;gap:12px;align-items:flex-start;background:var(--warn-bg);border-left:4px solid var(--warn);padding:14px 16px;font-size:13px}
-  .disclaimer p{margin:0}.disclaimer .i{margin-top:2px;color:var(--warn);width:1.3em;height:1.3em}
-  .head-row{display:flex;justify-content:space-between;align-items:baseline}
-  /* Don't-sweat-it */
+
+  /* Bills */
+  .bill{display:grid;grid-template-columns:36px minmax(0,1fr) auto auto;gap:4px 12px;align-items:center;padding:10px 8px;margin:0 -8px;border-bottom:1px solid var(--line);border-radius:10px;cursor:pointer}
+  .bill:hover{background:var(--blue-50)}
+  .bill:hover .name{color:var(--accent-text)}
+  .ico{width:36px;height:36px;border-radius:10px;display:grid;place-items:center;font-size:17px;background:color-mix(in srgb,var(--c) 16%,transparent);color:color-mix(in srgb,var(--c),var(--ico-tint) var(--ico-amt))}
+  .bill .name{font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .bill .meta{font-size:12px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .bill .amt{text-align:right;font-variant-numeric:tabular-nums;font-weight:600}
+  .bill .amt small{display:block;font-weight:400;color:var(--muted);font-size:12px}
+  .acts{display:flex;margin-right:-4px}
+  .x{border:0;background:transparent;color:var(--muted);cursor:pointer;width:38px;height:38px;border-radius:9px;display:grid;place-items:center;font-size:16px}
+  .x:hover{background:var(--bad-bg);color:var(--bad)}
+  .x.ed:hover{background:var(--blue-100);color:var(--accent-text)}
+  button.bill{width:calc(100% + 16px);font:inherit;color:inherit;text-align:left;background:none;border:0;border-bottom:1px solid var(--line)}
+  .bill .chev{color:var(--muted);width:16px;height:16px}
+  .bill.editing{background:var(--blue-50);box-shadow:inset 3px 0 0 var(--blue-600)}
+  .bill-total{display:flex;justify-content:space-between;align-items:baseline;gap:12px;padding:12px 0 0;font-weight:600}
+  .bill-total .num{font-size:17px}
+  .bill-total small{font-weight:400;color:var(--muted);font-size:12px}
+  .empty{text-align:center;color:var(--muted);padding:28px 0 12px}
+  .empty .i{width:28px;height:28px;display:block;margin:0 auto 8px;opacity:.6}
+  .cats{display:flex;flex-wrap:wrap;gap:6px;margin-top:14px}
+  .chip{font-size:12.5px;padding:4px 10px;border-radius:999px;background:var(--blue-50);color:var(--ink);display:flex;gap:6px;align-items:center;font-variant-numeric:tabular-nums}
+  .dot{width:8px;height:8px;border-radius:50%;flex:none}
+
+  /* Result tiles */
   .sweat{display:grid;grid-template-columns:1fr 1fr 1.3fr;gap:16px;align-items:end}
-  .sweat.ef{grid-template-columns:1fr 1fr 1fr}
-  .sweat .res{background:var(--blue-50);border-radius:12px;padding:14px;text-align:center}
-  .sweat .res .v{font-size:28px;font-weight:700;color:var(--accent-text);font-variant-numeric:tabular-nums}
-  .verdict{margin-top:14px;padding:12px 14px;border-radius:12px;font-weight:500;border-left:4px solid currentColor}
-  .verdict.ok{background:var(--ok-bg);color:var(--good)}
-  .verdict.think{background:var(--warn-bg);color:var(--warn)}
-  .verdict.no{background:var(--bad-bg);color:var(--bad)}
-  .note{font-size:12px;color:var(--muted);margin-top:10px}
-  /* Comfy income */
-  .tiers{display:grid;grid-template-columns:1fr 1fr 1.3fr;gap:10px}
-  .tier{background:var(--blue-50);border:2px solid transparent;border-radius:12px;padding:12px;text-align:center}
-  .tier .k{font-size:12px;color:var(--muted);font-weight:600}
-  .tier .v{font-size:20px;font-weight:700;font-variant-numeric:tabular-nums;margin:2px 0}
-  .tier .s{font-size:12px;color:var(--muted)}
-  .tier.comfy{background:var(--ok-bg)}.tier.comfy .v{color:var(--good)}
-  .tier.you{border-color:var(--blue-600)}
-  .tier.you .k::after{content:" · you";color:var(--blue-600)}
-  .gauge{position:relative;height:12px;border-radius:99px;background:var(--blue-100);margin:30px 0 0;display:flex;overflow:visible}
-  .gauge span.z{display:block;height:100%}
-  .gauge span.z:first-child{border-radius:99px 0 0 99px}.gauge span.z:last-child{border-radius:0 99px 99px 0}
-  .pin{position:absolute;top:-24px;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;font-size:11px;font-weight:700;color:var(--ink);white-space:nowrap}
-  .pin::after{content:"";width:3px;height:30px;background:var(--ink);border-radius:2px;margin-top:2px}
-  textarea{width:100%;font:12px/1.4 ui-monospace,SFMono-Regular,Consolas,monospace;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:var(--input-bg);color:var(--ink);resize:vertical}
-  textarea:focus{outline:2px solid var(--blue-500);outline-offset:-1px;border-color:transparent}
+  .sweat.ef{grid-template-columns:1fr 1fr 1fr;align-items:stretch}
+  .sweat.ef .res{display:flex;flex-direction:column;justify-content:center}
+  .sweat.ef .btn{align-self:center}
+  .sweat.two{grid-template-columns:1fr 1fr}
+  .res{background:var(--blue-50);border-radius:12px;padding:12px 14px;text-align:center}
+  .res .k{font-size:12px;color:var(--muted);font-weight:500}
+  .res .v{font-size:26px;line-height:1.25;font-weight:700;color:var(--accent-text);font-variant-numeric:tabular-nums}
+  .res .v.sm{font-size:21px;color:var(--ink)}
+  .note{font-size:12.5px;color:var(--muted);margin-top:10px}
+  .slider-head{display:flex;justify-content:space-between;align-items:baseline;gap:12px;margin-top:16px}
+  .slider-head label{margin:0}
+  .slider-head b{font-size:14px;font-variant-numeric:tabular-nums;white-space:nowrap}
+
+  /* Alerts: status messages. Colour is always backed by an icon and a title. */
+  .alert{display:flex;gap:10px;align-items:flex-start;margin-top:14px;padding:12px 14px;border-radius:12px;font-size:14px;background:var(--a-bg);border:1px solid color-mix(in srgb,var(--a-fg) 28%,transparent)}
+  .alert > .i{color:var(--a-fg);width:18px;height:18px;margin-top:2px}
+  .alert b{display:block;color:var(--a-fg);font-weight:600}
+  .alert span{display:block;margin-top:1px}
+  .alert.ok{--a-bg:var(--ok-bg);--a-fg:var(--good)}
+  .alert.warn{--a-bg:var(--warn-bg);--a-fg:var(--warn)}
+  .alert.no{--a-bg:var(--bad-bg);--a-fg:var(--bad)}
+  .alert.info{--a-bg:var(--info-bg);--a-fg:var(--info)}
+
+  /* Comfy income zones */
+  .zones{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+  .zone{background:var(--blue-50);border:1px solid transparent;border-radius:12px;padding:12px;min-width:0}
+  .zone .k{font-size:12.5px;font-weight:600;display:flex;align-items:center;gap:6px}
+  .zone .k .dot{width:10px;height:10px;border-radius:3px;background:var(--z)}
+  .zone .v{font-size:16px;font-weight:700;font-variant-numeric:tabular-nums;margin:4px 0 2px}
+  .zone .s{font-size:12px;color:var(--muted)}
+  .zone.short{--z:var(--z-short)}.zone.tight{--z:var(--z-tight)}.zone.by{--z:var(--z-by)}.zone.comfy{--z:var(--z-comfy)}
+  .zone.you{border-color:var(--z);background:color-mix(in srgb,var(--z) 14%,var(--card));box-shadow:inset 0 3px 0 var(--z)}
+  .zone.you .k::after{content:"You are here";margin-left:auto;font-size:10.5px;font-weight:700;padding:1px 7px;border-radius:999px;background:var(--ink);color:var(--card);white-space:nowrap}
+  .gauge{position:relative;height:12px;margin:38px 0 0;display:flex;gap:2px}
+  .gauge .z{display:block;height:100%;min-width:0}
+  .gauge .z.short{background:var(--z-short);border-radius:99px 0 0 99px}.gauge .z.tight{background:var(--z-tight)}
+  .gauge .z.by{background:var(--z-by)}.gauge .z.comfy{background:var(--z-comfy);border-radius:0 99px 99px 0}
+  .pin{position:absolute;top:-25px;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;font-size:11px;font-weight:700;color:var(--ink);white-space:nowrap}
+  .pin::after{content:"";width:3px;height:26px;background:var(--ink);border-radius:2px;margin-top:3px;box-shadow:0 0 0 2px var(--card)}
+
   .io-btns{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:12px}
-  footer{text-align:center;color:var(--muted);font-size:12px;padding:8px 16px 32px}
+  footer{text-align:center;color:var(--muted);font-size:12px;padding:0 16px 32px}
+
+  /* Toast */
+  .toast{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);z-index:10;display:flex;align-items:center;gap:6px;max-width:calc(100vw - 32px);padding:10px 10px 10px 16px;border-radius:12px;background:#0F1B33;color:#fff;font-size:14px;box-shadow:0 8px 28px rgba(0,0,0,.35);border:1px solid rgba(255,255,255,.12)}
+  .toast button{border:0;background:transparent;color:#8FB3FF;font:inherit;font-weight:600;padding:6px 10px;border-radius:8px;cursor:pointer}
+  .toast button:hover{background:rgba(255,255,255,.1)}
 
   @media (max-width:760px){
     .grid{grid-template-columns:1fr}
-    .hero .big{font-size:36px}
-    .stats{grid-template-columns:1fr 1fr 1fr;gap:6px}
-    .stat .v{font-size:15px}
-    .sweat{grid-template-columns:1fr 1fr}
+    .hero .big{font-size:40px}
+    .stats{gap:6px}
+    .stat{padding:10px 8px}
+    .stat .v{font-size:16px}
+    .sweat,.sweat.two{grid-template-columns:1fr 1fr}
     .sweat .res{grid-column:1 / -1}
     .sweat.ef{grid-template-columns:1fr}
-    .tiers{grid-template-columns:1fr 1fr}
-    .tier.comfy{grid-column:1 / -1}
+    .zones{grid-template-columns:1fr 1fr}
     .io-btns{grid-template-columns:1fr 1fr}
-    .print-btn{padding:6px 10px}
+    .tagline{display:none}
+    .card{padding:16px}
+    .hero{padding:22px 16px 16px}
+    .seg button{padding:7px 10px}
+    .hero .seg{display:flex;flex-wrap:nowrap}
+    .hero .seg button{flex:1 1 auto;padding:7px 4px;font-size:12.5px}
+    .x{width:34px;height:38px}
+    .bill{gap:4px 10px}
+    .bill .cat-lbl{display:none}
+    .zone.you .k::after{content:"You"}
+  }
+  @media (max-width:520px){
+    .notice summary{flex-wrap:wrap;row-gap:4px}
+    .notice-title{flex:1 1 calc(100% - 28px)}
+    .notice-toggle{margin-left:28px}
+    .notice ul{padding-left:16px}
   }
 
   /* Print: a clean summary on white paper */
-  .print-btn{margin-left:auto;border:1px solid rgba(255,255,255,.35);background:rgba(255,255,255,.12);color:#fff;font:inherit;font-size:13px;font-weight:600;padding:9px 14px;border-radius:999px;cursor:pointer;display:inline-flex;gap:6px;align-items:center}
-  .print-btn:hover{background:rgba(255,255,255,.22)}
-  .print-date{display:none}
   @media print{
     @page{margin:14mm}
     *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
     body{background:#fff;font-size:12px}
-    .no-print,.x,#efGoal,#savePct,.seg button:not(.on){display:none !important}
-    header{background:none;color:var(--ink);padding:0 0 10px;border-bottom:2px solid var(--blue-600);margin-bottom:12px}
+    .no-print,.x,.chev,#efGoal,#savePct,.seg button:not(.on){display:none !important}
+    .top{background:none;color:var(--ink);padding:0 0 10px;border-bottom:2px solid var(--blue-600);margin-bottom:12px}
     .wrap{max-width:none;padding:0}
-    .logo{background:var(--blue-600);color:#fff}
+    .logo .lg-bg{fill:var(--blue-600)}
+    .tagline{border-left-color:var(--line);color:var(--muted);opacity:1}
     .print-date{display:inline;margin-left:auto;font-size:12px;font-weight:400;color:var(--muted)}
     main{margin-top:0;padding-bottom:0}
-    .card{box-shadow:none;border:1px solid var(--line);padding:14px;margin-bottom:12px;break-inside:avoid}
-    .grid{display:block}.grid > .card{margin-bottom:12px}
-    .grid > .stack > * + *{margin-top:0}
-    .bill{break-inside:avoid;padding:6px 0}
-    #bills{display:block !important}#billsSum{display:none !important}
-    .seg{margin:8px 0 0;border:0;background:none}
+    main > * + *{margin-top:12px}
+    .card{box-shadow:none;padding:14px;break-inside:avoid}
+    .grid{display:block}.grid > * + *{margin-top:12px}
+    .col{gap:12px}
+    .bill{break-inside:avoid;padding:6px 0;margin:0}
+    #bills{display:block !important}#cats{display:flex !important}#billsSum{display:none !important}
+    .seg{border:0;background:none;padding:0}
+    .hero .seg{margin-top:8px}
     .seg button.on{box-shadow:none}
-    input,select{border:0;padding:2px 0;background:none;appearance:none;-webkit-appearance:none;font-weight:600}
+    input,select{border:0;padding:2px 0;min-height:0;background:none;font-weight:600}
     .money input{padding-left:12px}.money::before{left:0}
     input::placeholder{color:transparent}
     .hero{padding:14px}
     .hero .big{font-size:34px}
-    footer{padding:4px 0 0}
+    footer{padding:8px 0 0}
   }
 </style>
 </head>
 <body>
-<header>
-  <div class="wrap brand"><div class="logo">$</div> Leftover <span style="font-weight:400;font-size:13px;opacity:.75;margin-left:4px">· bills, savings &amp; guilt-free money</span>
+<header class="top">
+  <div class="wrap top-row">
+    <h1 class="brand">
+      <svg class="logo" viewBox="0 0 32 32" aria-hidden="true"><rect class="lg-bg" width="32" height="32" rx="9"/><circle class="lg-ring" cx="16" cy="16" r="8" fill="none" stroke-width="4"/><circle class="lg-slice" cx="16" cy="16" r="8" fill="none" stroke-width="4" stroke-dasharray="17 50.3" stroke-linecap="round" transform="rotate(-90 16 16)"/></svg>
+      Leftover
+    </h1>
+    <span class="tagline">Bills, savings &amp; guilt-free money</span>
     <span class="print-date" id="printDate"></span>
-    <button class="print-btn no-print" type="button" id="printBtn"><svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect width="12" height="8" x="6" y="14"/></svg>Print</button></div>
+    <button class="print-btn no-print" type="button" id="printBtn"><svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect width="12" height="8" x="6" y="14"/></svg>Print</button>
+  </div>
 </header>
 
 <main class="wrap">
-  <aside class="card disclaimer" role="note" aria-label="Important notice">
-    <svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
-    <p><b>General information only. This is not financial advice.</b> Leftover is a simple calculator. It doesn't know your full situation and doesn't recommend or compare any financial product, so nothing here is financial product advice, tax advice or legal advice. It is not provided by an Australian financial services licensee. Results are estimates based on what you enter, simple rules of thumb (50/30/20, 3–6 months of bills) and general tax rates, and they may be wrong. Check them yourself and consider speaking to a licensed financial adviser or registered tax agent before making financial decisions.</p>
+  <aside role="note" aria-label="Important notice">
+    <details class="card notice" id="notice" open>
+      <summary>
+        <svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+        <span class="notice-title"><b>General information only. This is not financial advice.</b> <span class="notice-short">Results are estimates and may be wrong.</span></span>
+        <span class="notice-toggle no-print"><span class="when-closed">Read full notice</span><span class="when-open">Hide</span><svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></span>
+      </summary>
+      <ul>
+        <li><b>What this is.</b> Leftover is a simple calculator. It doesn't know your full situation and doesn't recommend or compare any financial product, so nothing here is financial product advice, tax advice or legal advice. It is not provided by an Australian financial services licensee.</li>
+        <li><b>How results are worked out.</b> Results are estimates based on what you enter, simple rules of thumb (50/30/20, 3–6 months of bills) and general tax rates, and they may be wrong.</li>
+        <li><b>What to do.</b> Check them yourself and consider speaking to a licensed financial adviser or registered tax agent before making financial decisions.</li>
+      </ul>
+    </details>
   </aside>
 
   <!-- HERO: the one number that matters -->
-  <section class="card hero">
-    <div class="label">Left to spend</div>
+  <section class="card hero" aria-labelledby="heroLbl">
+    <div class="eyebrow" id="heroLbl">Left to spend</div>
     <div class="big" id="heroAmt" role="status" aria-live="polite">$0</div>
     <div class="sub" id="heroSub">per fortnight after bills</div>
-    <div class="seg" id="periodSeg"></div>
+    <div><div class="seg" id="periodSeg" role="group" aria-label="Show amounts per"></div></div>
     <div class="stats">
-      <div class="stat"><div class="k">Income</div><div class="v" id="sIncome">$0</div></div>
-      <div class="stat"><div class="k">Bills</div><div class="v" id="sBills">$0</div></div>
-      <div class="stat"><div class="k">Bills % of pay</div><div class="v" id="sPct">0%</div></div>
+      <div class="stat"><div class="k">Income</div><div class="v" id="sIncome">$0</div><div class="s" id="sIncomeS"></div></div>
+      <div class="stat"><div class="k">Bills</div><div class="v" id="sBills">$0</div><div class="s" id="sBillsS"></div></div>
+      <div class="stat"><div class="k">Bills % of pay</div><div class="v" id="sPct">0%</div><div class="s" id="sZone"></div></div>
     </div>
-    <div class="meter" id="meter"></div>
-    <div class="legend"><span>Bills</span><span>Free to spend</span></div>
+    <div class="meter-wrap" id="meterWrap"><div class="meter" id="meter"></div><span class="tick" id="tick" hidden></span></div>
+    <div class="legend"><span id="lgBills">Bills</span><span id="lgFree">Free to spend</span></div>
   </section>
 
   <div class="grid">
     <!-- INPUTS -->
-    <section class="stack">
-      <div class="card">
-        <h2>1. Your take-home pay</h2>
+    <div class="col">
+      <section class="card">
+        <div class="card-head"><h2><span class="step">1</span>Your take-home pay</h2></div>
         <div class="row">
-          <div><label for="incAmt">Amount (after tax)</label><div class="money"><input id="incAmt" type="number" min="0" step="0.01" inputmode="decimal"></div></div>
+          <div><label for="incAmt">Amount (after tax)</label><div class="money"><input id="incAmt" type="number" min="0" step="0.01" inputmode="decimal" placeholder="0.00"></div></div>
           <div><label for="incFreq">Paid</label><select id="incFreq"></select></div>
         </div>
-      </div>
+      </section>
 
-      <div class="card no-print">
-        <h2 id="billFormTitle">2. Add a regular bill</h2>
+      <section class="card no-print">
+        <div class="card-head"><h2><span class="step">2</span><span id="billFormTitle">Add a regular bill</span></h2></div>
         <form id="billForm" class="stack">
-          <div><label>Quick add</label><div class="quick" id="quick"></div></div>
+          <div><div class="label" id="quickLbl">Quick add</div><div class="quick" id="quick" role="group" aria-labelledby="quickLbl"></div></div>
           <div><label for="bName">What is it?</label><input id="bName" placeholder="e.g. Rent, Netflix, Car rego" required></div>
           <div class="row">
-            <div><label for="bAmt">Amount</label><div class="money"><input id="bAmt" type="number" min="0" step="0.01" inputmode="decimal" required></div></div>
+            <div><label for="bAmt">Amount</label><div class="money"><input id="bAmt" type="number" min="0" step="0.01" inputmode="decimal" placeholder="0.00" required></div></div>
             <div><label for="bFreq">How often</label><select id="bFreq"></select></div>
           </div>
           <div><label for="bCat">Category</label><select id="bCat"></select></div>
           <button class="btn" type="submit" id="billSubmit">Add bill</button>
           <button class="btn ghost" type="button" id="billCancel" hidden>Cancel</button>
         </form>
-      </div>
-      <button class="btn ghost no-print" id="sampleBtn">Load example budget</button>
-    </section>
+        <div class="center" style="margin-top:8px"><button class="btn link" type="button" id="sampleBtn">Load example budget</button></div>
+      </section>
+    </div>
 
     <!-- BILLS LIST -->
     <section class="card">
-      <div class="head-row">
-        <h2>Regular bills <span class="muted" id="billCount" style="font-weight:400">(0)</span></h2>
-        <span class="muted" style="font-size:13px" id="listHint">shown per fortnight</span>
+      <div class="card-head">
+        <h2>Regular bills <span class="count" id="billCount">(0)</span></h2>
+        <div class="seg no-print" id="viewSeg" role="group" aria-label="Bill list view"><button type="button" data-v="summary">Summary</button><button type="button" data-v="details">Details</button></div>
       </div>
-      <div class="seg no-print" id="viewSeg" style="margin:0 0 8px"><button type="button" data-v="summary">Summary</button><button type="button" data-v="details">Details</button></div>
       <div id="billsSum"></div>
       <div id="bills"></div>
+      <div class="bill-total" id="billTotal"><span>Total bills</span><span class="num" id="billTotalAmt"></span></div>
       <div class="cats" id="cats"></div>
     </section>
   </div>
 
   <!-- COMFY INCOME -->
-  <section class="card" style="margin-top:16px">
-    <div class="head-row"><h2>Income for a comfy life</h2><span class="muted" style="font-size:13px" id="cHint">take-home per fortnight</span></div>
-    <p class="muted" style="margin:0 0 14px;font-size:13px">Based on the <b>50/30/20 rule</b>: bills take no more than half your take-home pay, leaving 30% for fun and 20% for savings. Worked out from your bills.</p>
-    <div class="tiers">
-      <div class="tier" id="tMin"><div class="k">Just covers bills</div><div class="v" id="cMin">$0</div><div class="s">bills are 100% of pay</div></div>
-      <div class="tier" id="tTight"><div class="k">Getting by</div><div class="v" id="cTight">$0</div><div class="s">bills are 70% of pay</div></div>
-      <div class="tier comfy" id="tComfy"><div class="k">Comfy</div><div class="v" id="cComfy">$0</div><div class="s">bills are 40–50% of pay</div></div>
+  <section class="card">
+    <div class="card-head"><h2>Income for a comfy life</h2><span class="hint" id="cHint">take-home per fortnight</span></div>
+    <p class="desc">Based on the <b>50/30/20 rule</b>: bills take no more than half your take-home pay, leaving 30% for fun and 20% for savings. Worked out from your bills.</p>
+    <div class="zones">
+      <div class="zone short" id="z-short"><div class="k"><span class="dot"></span>Short</div><div class="v" id="cShort">–</div><div class="s">bills are more than your pay</div></div>
+      <div class="zone tight" id="z-tight"><div class="k"><span class="dot"></span>Tight</div><div class="v" id="cTight">–</div><div class="s">bills are 70–100% of pay</div></div>
+      <div class="zone by" id="z-by"><div class="k"><span class="dot"></span>Getting by</div><div class="v" id="cBy">–</div><div class="s">bills are 50–70% of pay</div></div>
+      <div class="zone comfy" id="z-comfy"><div class="k"><span class="dot"></span>Comfy</div><div class="v" id="cComfy">–</div><div class="s">bills are 40–50% of pay</div></div>
     </div>
-    <div class="gauge" id="cGauge"></div>
-    <div class="legend"><span>Short</span><span>Tight</span><span>Getting by</span><span style="color:var(--good)">Comfy</span></div>
-    <div class="verdict" id="cVerdict"></div>
+    <div class="gauge" id="cGauge" aria-hidden="true"></div>
+    <div id="cVerdict"></div>
     <div class="note" id="cGross"></div>
   </section>
 
   <!-- EMERGENCY FUND -->
-  <section class="card" style="margin-top:16px">
-    <div class="head-row"><h2>Emergency fund</h2><div class="seg" id="efSeg" style="margin:0"></div></div>
-    <p class="muted" style="margin:0 0 14px;font-size:13px">Money set aside in case you lose your job (redundancy, restructure, illness). The usual advice: enough to cover <b>3–6 months of bills</b> while you find new work.</p>
+  <section class="card">
+    <div class="card-head"><h2>Emergency fund</h2><div class="seg" id="efSeg" role="group" aria-label="Months of bills to cover"></div></div>
+    <p class="desc">Money set aside in case you lose your job (redundancy, restructure, illness). The usual advice: enough to cover <b>3–6 months of bills</b> while you find new work.</p>
     <div class="sweat ef">
-      <div class="res"><div class="k muted" style="font-size:12px">Your bills per month</div><div class="v" id="efMonth" style="font-size:22px">$0</div></div>
-      <div class="res"><div class="k muted" style="font-size:12px" id="efLbl">You should have</div><div class="v" id="efAmt">$0</div></div>
+      <div class="res"><div class="k">Your bills per month</div><div class="v sm" id="efMonth">$0</div></div>
+      <div class="res"><div class="k" id="efLbl">3 months of bills</div><div class="v" id="efAmt">$0</div></div>
       <button class="btn ghost" id="efGoal" type="button">Make this my savings goal</button>
     </div>
     <div class="note" id="efNote"></div>
   </section>
 
   <!-- SAVINGS GOAL -->
-  <section class="card" style="margin-top:16px">
-    <h2>3. Savings goal</h2>
+  <section class="card">
+    <div class="card-head"><h2><span class="step">3</span>Savings goal</h2></div>
     <div class="sweat">
       <div><label for="goalName">Saving for</label><input id="goalName" placeholder="e.g. Holiday, emergency fund"></div>
       <div><label for="goalAmt">Goal amount</label><div class="money"><input id="goalAmt" type="number" min="0" step="100" inputmode="decimal" placeholder="e.g. 5000"></div></div>
       <div><label for="goalHave">Already saved</label><div class="money"><input id="goalHave" type="number" min="0" step="100" inputmode="decimal" placeholder="0"></div></div>
     </div>
-    <div style="margin-top:16px">
-      <div class="head-row"><label for="savePct" style="margin:0">Save this much of what's left to spend</label><b id="savePctLbl"></b></div>
-      <input id="savePct" type="range" min="0" max="100" step="5" style="padding:0;border:0;accent-color:var(--blue-600)">
-    </div>
-    <div class="stats">
+    <div class="slider-head"><label for="savePct">Save this much of what's left to spend</label><b id="savePctLbl"></b></div>
+    <input id="savePct" type="range" min="0" max="100" step="5">
+    <div class="stats" style="margin-top:8px">
       <div class="stat"><div class="k">You'll reach it in</div><div class="v" id="gTime">–</div></div>
       <div class="stat"><div class="k">Target date</div><div class="v" id="gDate">–</div></div>
       <div class="stat"><div class="k">If you saved it all</div><div class="v" id="gFast">–</div></div>
     </div>
-    <div class="meter" id="gMeter" style="margin-top:14px"><span id="gBar" style="background:var(--good)"></span></div>
+    <div class="meter" id="gMeter" style="margin-top:16px"><span id="gBar" style="background:var(--z-comfy)"></span></div>
     <div class="legend"><span id="gProg"></span><span id="gLeft"></span></div>
   </section>
 
   <!-- GUILT-FREE -->
   <section class="card">
-    <h2>4. Guilt-free spending</h2>
-    <p class="muted" style="margin:-6px 0 14px;font-size:13px">Bills paid, savings put aside: what's left is guilt-free. Spend it on snacks, coffee or fun without stressing. (Based on Ramit Sethi's “Conscious Spending Plan”.)</p>
-    <div class="sweat" style="grid-template-columns:1fr 1fr">
-      <div><label for="tryAmt">Thinking of buying…</label><div class="money"><input id="tryAmt" type="number" min="0" step="0.5" inputmode="decimal"></div></div>
-      <div class="res"><div class="k muted" style="font-size:12px">Guilt-free money per day</div><div class="v" id="sweatAmt">$0</div></div>
+    <div class="card-head"><h2><span class="step">4</span>Guilt-free spending</h2></div>
+    <p class="desc">Bills paid, savings put aside: what's left is guilt-free. Spend it on snacks, coffee or fun without stressing. (Based on Ramit Sethi's “Conscious Spending Plan”.)</p>
+    <div class="sweat two">
+      <div><label for="tryAmt">Thinking of buying…</label><div class="money"><input id="tryAmt" type="number" min="0" step="0.5" inputmode="decimal" placeholder="0.00"></div></div>
+      <div class="res"><div class="k">Guilt-free money per day</div><div class="v" id="sweatAmt">$0</div></div>
     </div>
     <div class="note" id="gfMath" style="font-size:13px;margin-top:14px"></div>
-    <div class="verdict" id="verdict"></div>
-    <div class="note">A rule of thumb, not financial advice.</div>
+    <div id="verdict"></div>
+    <div class="note"><b>How a purchase is judged:</b> fits in one day's guilt-free money = go for it · more than a day's but fits in a week's = think it over · more than a week's = save up first. A rule of thumb, not financial advice.</div>
   </section>
 
   <!-- EXPORT / IMPORT -->
   <section class="card no-print">
-    <h2>Move to another device</h2>
-    <p class="muted" style="margin:-6px 0 14px;font-size:13px">Your budget is saved only in this browser. To use it somewhere else, export it here, then paste it into <b>Import</b> on your other device.</p>
-    <textarea id="ioText" rows="5" spellcheck="false" placeholder="Click Export to get your data, or paste exported data here and click Import."></textarea>
+    <div class="card-head"><h2>Move to another device</h2></div>
+    <p class="desc">Your budget is saved only in this browser. To use it somewhere else, export it here, then paste it into <b>Import</b> on your other device.</p>
+    <label for="ioText">Budget data</label>
+    <textarea id="ioText" rows="4" spellcheck="false" placeholder="Click Export to get your data, or paste exported data here and click Import."></textarea>
     <div class="io-btns">
       <button class="btn" type="button" id="exportBtn">Export &amp; copy</button>
       <button class="btn ghost" type="button" id="importBtn">Import</button>
@@ -317,10 +439,12 @@
       <button class="btn ghost" type="button" id="openBtn">Open file</button>
       <input type="file" id="ioFile" accept=".json,application/json,text/plain" hidden>
     </div>
-    <div class="verdict" id="ioMsg" hidden></div>
+    <div id="ioMsg" hidden></div>
   </section>
 </main>
 <footer>General information only, not financial advice. Prototype · Figures are estimates. Saved only in this browser. Use Export to move it to another device.</footer>
+
+<div class="toast no-print" id="toast" role="status" aria-live="polite" hidden><span id="toastText"></span><button type="button" id="toastUndo">Undo</button></div>
 
 <script>
 const FREQ = { // occurrences per year
@@ -339,6 +463,18 @@ const CATS = {
   loans:{label:"Loans & cards",icon:svg('<rect width="20" height="14" x="2" y="5" rx="2"/><path d="M2 10h20"/>'),color:"#C8352B"},
   groceries:{label:"Groceries",icon:svg('<circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2 2h2l2.7 12.4a2 2 0 0 0 2 1.6h9.8a2 2 0 0 0 2-1.6L22 7H5.1"/>'),color:"#11875A"},
   other:{label:"Other",icon:svg('<path d="M21 8a2 2 0 0 0-1-1.7l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.7l7 4a2 2 0 0 0 2 0l7-4a2 2 0 0 0 1-1.7z"/><path d="m3.3 7 8.7 5 8.7-5M12 22V12"/>'),color:"#8A94A6"}
+};
+// Where your pay sits against your bills (50/30/20 rule). Used by the hero pill, zone cards and gauge.
+const ZONES = {short:"Short", tight:"Tight", by:"Getting by", comfy:"Comfy"};
+const ICON = {
+  ok:'<circle cx="12" cy="12" r="10"/><path d="m8.5 12.5 2.5 2.5 4.5-5"/>',
+  warn:'<path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/><path d="M12 9v4M12 17h.01"/>',
+  no:'<circle cx="12" cy="12" r="10"/><path d="m15 9-6 6M9 9l6 6"/>',
+  info:'<circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/>',
+  edit:'<path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/>',
+  trash:'<path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>',
+  chev:'<path d="m9 6 6 6-6 6"/>',
+  list:'<rect width="18" height="18" x="3" y="3" rx="2"/><path d="M7 8h10M7 12h10M7 16h6"/>'
 };
 // Common bills: name, category, usual frequency (amount left for the user)
 const PRESETS = [
@@ -366,7 +502,7 @@ const SAMPLE = {
   ]
 };
 
-const KEY = "spendable.v1";
+const KEY = "spendable.v1", NOTICE_KEY = "leftover.notice";
 let state = load() || {income:{amount:0,freq:"fortnightly"},bills:[],period:"fortnightly"};
 
 function load(){ try{ return JSON.parse(localStorage.getItem(KEY)); }catch{ return null; } }
@@ -376,6 +512,20 @@ const toPeriod = (amt,freq,period) => amt * FREQ[freq].n / FREQ[period].n;
 const fmt = v => (v<0?"-":"") + "$" + Math.abs(v).toLocaleString("en-AU",{minimumFractionDigits:2,maximumFractionDigits:2});
 const fmt0 = v => (v<0?"-":"") + "$" + Math.abs(Math.round(v)).toLocaleString("en-AU");
 const $ = id => document.getElementById(id);
+const plural = (n,w) => `${n} ${w}${n===1?"":"s"}`;
+
+// Status message: coloured box with an icon and a bold title, so colour is never the only signal.
+// kind: ok (green) | info (blue, nothing wrong) | warn (yellow, worth a second look) | no (red)
+function alertBox(el,kind,title,text){
+  el.hidden = false; el.className = "alert "+kind;
+  el.innerHTML = svg(ICON[kind]) + `<div><b>${esc(title)}</b>${text?`<span>${esc(text)}</span>`:""}</div>`;
+}
+let toastTimer, undoFn = null;
+function toast(text,undo){
+  $("toastText").textContent = text; undoFn = undo||null; $("toastUndo").hidden = !undo; $("toast").hidden = false;
+  clearTimeout(toastTimer); toastTimer = setTimeout(()=>{ $("toast").hidden = true; undoFn = null; }, undo?7000:3500);
+}
+$("toastUndo").addEventListener("click",()=>{ if(undoFn) undoFn(); undoFn = null; $("toast").hidden = true; });
 
 function fillSelect(el,obj,val){ el.innerHTML = Object.entries(obj).map(([k,v])=>`<option value="${k}">${v.label}</option>`).join(""); if(val) el.value=val; }
 fillSelect($("incFreq"),FREQ,state.income.freq);
@@ -389,93 +539,106 @@ $("quick").addEventListener("click",e=>{
   document.querySelectorAll("#quick button").forEach(b=>b.classList.toggle("on",b===btn));
   $("bAmt").focus();
 });
-$("periodSeg").innerHTML =PERIODS.map(p=>`<button data-p="${p}">${FREQ[p].label}</button>`).join("");
+$("periodSeg").innerHTML = PERIODS.map(p=>`<button type="button" data-p="${p}">${FREQ[p].label}</button>`).join("");
 
 function render(){
-  const P = state.period;
+  const P = state.period, per = PERIOD_WORD[P];
   const income = toPeriod(+state.income.amount||0,state.income.freq,P);
   const bills = state.bills.reduce((s,b)=>s+toPeriod(b.amount,b.freq,P),0);
   const left = income - bills;
   const pct = income>0 ? bills/income*100 : 0;
+  // comfy income: 50/30/20 rule, worked back from bills
+  const cTight = bills/0.7, cLo = bills/0.5, cHi = bills/0.4;
+  const zone = !bills||!income ? "" : income<bills ? "short" : income<cTight ? "tight" : income<cLo ? "by" : "comfy";
 
   $("heroAmt").textContent = fmt(left);
   $("heroAmt").classList.toggle("neg",left<0);
-  $("heroSub").textContent = left<0 ? `short per ${PERIOD_WORD[P]} — your bills are more than your pay`
-                                    : `per ${PERIOD_WORD[P]} after bills`;
+  $("heroSub").textContent = !income&&!bills ? "Enter your pay and your bills below to get started"
+    : left<0 ? `short per ${per}: your bills are more than your pay` : `per ${per} after bills`;
   $("sIncome").textContent = fmt0(income);
+  $("sIncomeS").textContent = "per "+per;
   $("sBills").textContent = fmt0(bills);
-  $("sPct").textContent = Math.round(pct)+"%";
-  $("sPct").style.color = pct>80?"var(--bad)":pct>60?"var(--warn)":"var(--good)";
+  $("sBillsS").textContent = plural(state.bills.length,"bill");
+  $("sPct").textContent = income ? Math.round(pct)+"%" : "–";
+  $("sZone").innerHTML = zone ? `<span class="pill ${zone}">${ZONES[zone]}</span>` : income ? "add your bills" : "add your pay";
   $("billCount").textContent = `(${state.bills.length})`;
-  $("listHint").textContent ="shown per " + PERIOD_WORD[P];
-  document.querySelectorAll("#periodSeg button").forEach(b=>b.classList.toggle("on",b.dataset.p===P));
+  document.querySelectorAll("#periodSeg button").forEach(b=>{ b.classList.toggle("on",b.dataset.p===P); b.setAttribute("aria-pressed",b.dataset.p===P); });
 
-  // meter split by category
+  // meter split by category, with a marker at the comfy limit (bills = 50% of pay)
   const byCat = {};
   state.bills.forEach(b=>byCat[b.cat]=(byCat[b.cat]||0)+toPeriod(b.amount,b.freq,P));
   const total = Math.max(income,bills)||1;
-  $("meter").innerHTML = Object.entries(byCat).map(([c,v])=>`<span title="${CATS[c].label}: ${fmt(v)}" style="width:${v/total*100}%;background:${CATS[c].color}"></span>`).join("")
-    + (left>0?`<span style="width:${left/total*100}%;background:var(--blue-100)"></span>`:"");
+  $("meter").innerHTML = Object.entries(byCat).map(([c,v])=>`<span title="${CATS[c].label}: ${fmt(v)}" style="flex:${v/total} 1 0;background:${CATS[c].color}"></span>`).join("")
+    + (left>0?`<span style="flex:${left/total} 1 0;background:transparent"></span>`:"");
+  $("tick").hidden = !(income&&bills);
+  $("meterWrap").classList.toggle("has-tick",!!(income&&bills));
+  $("tick").style.left = income*0.5/total*100+"%";
+  $("lgBills").innerHTML = `Bills <b>${fmt0(bills)}</b>`;
+  $("lgFree").innerHTML = left<0 ? `Short by <b>${fmt0(-left)}</b>` : `Free to spend <b>${fmt0(left)}</b>`;
 
   // bill list
   $("bills").innerHTML = state.bills.length ? state.bills.map((b,i)=>{
     const c = CATS[b.cat];
     return `<div class="bill${i===editIdx?" editing":""}" data-i="${i}">
-      <div class="ico" style="background:${c.color}26;color:${c.color}">${c.icon}</div>
-      <div><div class="name">${esc(b.name)}</div><div class="meta">${fmt(b.amount)} ${FREQ[b.freq].label.toLowerCase()} · ${c.label}</div></div>
-      <div class="amt">${fmt(toPeriod(b.amount,b.freq,P))}<small>/${PERIOD_WORD[P]}</small></div>
-      <button class="x ed" type="button" aria-label="Edit ${esc(b.name)}">${svg('<path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/>')}</button>
-      <button class="x" type="button" data-i="${i}" aria-label="Remove ${esc(b.name)}">×</button>
+      <div class="ico" style="--c:${c.color}">${c.icon}</div>
+      <div><div class="name">${esc(b.name)}</div><div class="meta">${fmt(b.amount)} ${FREQ[b.freq].label.toLowerCase()}<span class="cat-lbl"> · ${c.label}</span></div></div>
+      <div class="amt">${fmt(toPeriod(b.amount,b.freq,P))}<small>per ${per}</small></div>
+      <div class="acts"><button class="x ed" type="button" aria-label="Edit ${esc(b.name)}" title="Edit">${svg(ICON.edit)}</button>
+      <button class="x" type="button" data-i="${i}" aria-label="Remove ${esc(b.name)}" title="Remove">${svg(ICON.trash)}</button></div>
     </div>`;}).join("")
-    : `<div class="empty">No bills yet.<br>Add your rent, phone, insurance…</div>`;
+    : `<div class="empty">${svg(ICON.list)}<b>No bills yet</b><br>Add your rent, phone, insurance and other regular costs in step 2.<br><button class="btn link no-print" type="button" data-sample>Or load an example budget</button></div>`;
 
   // summary view (one row per category) for long lists, details for the full list
   const view = !state.bills.length ? "details" : billView || (state.bills.length>6 ? "summary" : "details");
   const cnt = {}; state.bills.forEach(b=>cnt[b.cat]=(cnt[b.cat]||0)+1);
-  $("billsSum").innerHTML = Object.entries(byCat).sort((a,b)=>b[1]-a[1]).map(([c,v])=>{
+  const sorted = Object.entries(byCat).sort((a,b)=>b[1]-a[1]);
+  $("billsSum").innerHTML = sorted.map(([c,v])=>{
     const k = CATS[c];
-    return `<div class="bill sum" data-v="details" title="Show details">
-      <div class="ico" style="background:${k.color}26;color:${k.color}">${k.icon}</div>
-      <div><div class="name">${k.label}</div><div class="meta">${cnt[c]} bill${cnt[c]===1?"":"s"}</div></div>
-      <div class="amt">${fmt(v)}<small>/${PERIOD_WORD[P]}</small></div></div>`; }).join("");
+    return `<button type="button" class="bill sum" title="Show the bills in ${k.label}">
+      <div class="ico" style="--c:${k.color}">${k.icon}</div>
+      <div><div class="name">${k.label}</div><div class="meta">${plural(cnt[c],"bill")} · ${Math.round(v/(bills||1)*100)}% of bills</div></div>
+      <div class="amt">${fmt(v)}<small>per ${per}</small></div>${svg(ICON.chev).replace('class="i"','class="i chev"')}</button>`; }).join("");
   $("billsSum").hidden = view!=="summary"; $("bills").hidden = view!=="details";
   $("viewSeg").hidden = !state.bills.length;
-  document.querySelectorAll("#viewSeg button").forEach(b=>b.classList.toggle("on",b.dataset.v===view));
-
-  $("cats").innerHTML =Object.entries(byCat).sort((a,b)=>b[1]-a[1]).map(([c,v])=>
+  document.querySelectorAll("#viewSeg button").forEach(b=>{ b.classList.toggle("on",b.dataset.v===view); b.setAttribute("aria-pressed",b.dataset.v===view); });
+  $("billTotal").hidden = !state.bills.length;
+  $("billTotalAmt").innerHTML = `${fmt(bills)} <small>per ${per}</small>`;
+  $("cats").hidden = view!=="details";
+  $("cats").innerHTML = sorted.map(([c,v])=>
     `<span class="chip"><span class="dot" style="background:${CATS[c].color}"></span>${CATS[c].label} ${fmt0(v)}</span>`).join("");
 
-  // comfy income: 50/30/20 rule, worked back from bills
-  const cTight = bills/0.7, cLo = bills/0.5, cHi = bills/0.4;
-  $("cHint").textContent = "take-home per " + PERIOD_WORD[P];
-  $("cMin").textContent = fmt0(bills);
-  $("cTight").textContent = fmt0(cTight);
-  $("cComfy").textContent = bills ? `${fmt0(cLo)} – ${fmt0(cHi)}` : "$0";
-  const zone = !bills||!income ? "" : income>=cLo ? "tComfy" : income>=cTight ? "tTight" : "tMin";
-  ["tMin","tTight","tComfy"].forEach(id=>$(id).classList.toggle("you",id===zone));
+  // comfy income zones
+  $("cHint").textContent = "take-home per " + per;
+  $("cShort").textContent = bills ? `Under ${fmt0(bills)}` : "–";
+  $("cTight").textContent = bills ? `${fmt0(bills)} – ${fmt0(cTight)}` : "–";
+  $("cBy").textContent = bills ? `${fmt0(cTight)} – ${fmt0(cLo)}` : "–";
+  $("cComfy").textContent = bills ? `${fmt0(cLo)} – ${fmt0(cHi)}` : "–";
+  Object.keys(ZONES).forEach(z=>$("z-"+z).classList.toggle("you",z===zone));
   const S = Math.max(cHi*1.15, income*1.08) || 1;
-  const zw = [[bills,"#F4B9B4"],[cTight-bills,"#F6D9A0"],[cLo-cTight,"#BFD3F8"],[S-cLo,"#8ED3B0"]];
-  $("cGauge").innerHTML = bills ? zw.map(([w,c])=>`<span class="z" style="width:${w/S*100}%;background:${c}"></span>`).join("")
+  const zw = [[bills,"short"],[cTight-bills,"tight"],[cLo-cTight,"by"],[S-cLo,"comfy"]];
+  $("cGauge").hidden = !bills;
+  $("cGauge").innerHTML = bills ? zw.map(([w,z])=>`<span class="z ${z}" style="flex:${w/S} 1 0"></span>`).join("")
     + (income ? `<div class="pin" style="left:${Math.min(98,Math.max(2,income/S*100))}%">You</div>` : "") : "";
-  const cv = $("cVerdict"), per = PERIOD_WORD[P];
-  if(!bills){ cv.className="verdict think"; cv.textContent="Add your bills to see what income gives you a comfy life."; }
-  else if(!income){ cv.className="verdict think"; cv.textContent=`Aim for ${fmt0(cLo)}–${fmt0(cHi)} take-home per ${per}. Enter your pay to see where you sit.`; }
-  else if(income<bills){ cv.className="verdict no"; cv.textContent=`You need ${fmt0(bills-income)} more per ${per} just to cover bills, and ${fmt0(cLo-income)} more to be comfy.`; }
-  else if(income<cLo){ cv.className="verdict think"; cv.textContent=`${income<cTight?"Tight":"Getting by"}: bills take ${Math.round(pct)}% of your pay. To be comfy, earn ${fmt0(cLo-income)} more per ${per}, or cut bills by ${fmt0(bills-income*0.5)}.`; }
-  else { cv.className="verdict ok"; cv.textContent=`You're in the comfy zone. Bills take ${Math.round(pct)}% of your pay, leaving room for fun and savings.`; }
+  const cv = $("cVerdict"), p = Math.round(pct);
+  if(!bills) alertBox(cv,"info","Add your bills first","Once your bills are in, this shows the take-home pay that gives you a comfy life.");
+  else if(!income) alertBox(cv,"info","Enter your pay to see where you sit",`For your bills, comfy is ${fmt0(cLo)}–${fmt0(cHi)} take-home per ${per}.`);
+  else if(zone==="short") alertBox(cv,"no","Short: your bills are more than your pay",`You need ${fmt0(bills-income)} more per ${per} just to cover bills, and ${fmt0(cLo-income)} more to be comfy.`);
+  else if(zone==="tight") alertBox(cv,"warn",`Tight: bills take ${p}% of your pay`,`Only ${fmt0(left)} per ${per} is left for everything else, so there is little room for savings or surprises. To be comfy (bills at 50% of pay or less), earn ${fmt0(cLo-income)} more per ${per}, or cut bills by ${fmt0(bills-income*0.5)}.`);
+  else if(zone==="by") alertBox(cv,"info",`Getting by: bills take ${p}% of your pay`,`Your bills are covered with ${fmt0(left)} per ${per} to spare, but that is less than the 50/30/20 rule suggests. To be comfy (bills at 50% of pay or less), earn ${fmt0(cLo-income)} more per ${per}, or cut bills by ${fmt0(bills-income*0.5)}.`);
+  else alertBox(cv,"ok",`Comfy: bills take ${p}% of your pay`,"That leaves room for fun and savings.");
   const yr = v => toPeriod(v,P,"annually");
   $("cGross").textContent = bills ? `Comfy before tax: about ${fmt0(grossFor(yr(cLo)))}–${fmt0(grossFor(yr(cHi)))} a year`
     + (income ? ` (you: about ${fmt0(grossFor(yr(income)))})` : "")
     + `. Uses Australian 2026–27 tax rates with Medicare levy; excludes super, HELP and other deductions.` : "";
 
-  // guilt-free spending: income − bills − extra debt/savings, per day
   // emergency fund: N months of bills
   const efM = state.efMonths, billsMonth = state.bills.reduce((s,b)=>s+toPeriod(b.amount,b.freq,"monthly"),0);
   const efAmt = billsMonth*efM;
   $("efMonth").textContent = fmt0(billsMonth);
-  $("efLbl").textContent = `${efM} months = you should have`;
+  $("efLbl").textContent = `${efM} months of bills`;
   $("efAmt").textContent = fmt0(efAmt);
-  document.querySelectorAll("#efSeg button").forEach(b=>b.classList.toggle("on",+b.dataset.m===efM));
+  $("efGoal").disabled = !billsMonth;
+  document.querySelectorAll("#efSeg button").forEach(b=>{ b.classList.toggle("on",+b.dataset.m===efM); b.setAttribute("aria-pressed",+b.dataset.m===efM); });
   const isEfGoal = state.goal.name==="Emergency fund";
   $("efNote").textContent = !billsMonth ? "Add your bills to see how much you need."
     : isEfGoal && state.goal.have ? `Your ${fmt0(state.goal.have)} saved would cover about ${(state.goal.have/billsMonth).toFixed(1)} months of bills.`
@@ -486,8 +649,8 @@ function render(){
   const saveP = Math.max(0,left) * pctSave/100;     // saved per selected period
   const need = Math.max(0,(+state.goal.amount||0) - (+state.goal.have||0));
   const saveDay = toPeriod(saveP,P,"daily"), leftDay = toPeriod(Math.max(0,left),P,"daily");
-  $("savePctLbl").textContent = `${pctSave}% · ${fmt0(saveP)} per ${PERIOD_WORD[P]}`;
-  const gName = state.goal.name ? esc(state.goal.name) : "your goal";
+  $("savePctLbl").textContent = `${pctSave}% · ${fmt0(saveP)} per ${per}`;
+  const goalName = state.goal.name || "your goal";
   if(!state.goal.amount){ $("gTime").textContent=$("gDate").textContent=$("gFast").textContent="–"; }
   else if(!need){ $("gTime").textContent="Done!"; $("gDate").textContent="Now"; $("gFast").textContent="–"; }
   else {
@@ -507,15 +670,15 @@ function render(){
   const perWeek = toPeriod(guiltFree,P,"weekly");
   $("sweatAmt").textContent = fmt(perDay);
   $("sweatAmt").style.color = perDay<0 ? "var(--bad)" : "";
-  $("gfMath").innerHTML = `Left to spend <b>${fmt(left)}</b> − saving for ${gName} <b>${fmt(saveP)}</b> = <b>${fmt(guiltFree)}</b> guilt-free per ${PERIOD_WORD[P]}`;
-  const v = $("verdict");
-  if(!state.income.amount){ v.className="verdict think"; v.textContent="Enter your take-home pay above to see your guilt-free money."; }
-  else if(left<=0){ v.className="verdict no"; v.textContent=`Your bills are more than your pay right now, so there's nothing left to save or spend. Start by looking for a bill to cut.`; }
-  else if(perDay<=0){ v.className="verdict think"; v.textContent=`You're saving everything that's left. Fastest way to ${gName}, but there's no guilt-free money. Try lowering the slider a bit.`; }
-  else if(!tryAmt){ v.className="verdict ok"; v.textContent=`You have ${fmt(perDay)} a day (${fmt0(perWeek)} a week) to spend guilt-free.`; }
-  else if(tryAmt<=perDay){ v.className="verdict ok"; v.textContent=`${fmt(tryAmt)}: go for it. It's ${Math.round(tryAmt/perDay*100)}% of today's ${fmt(perDay)} guilt-free money.`; }
-  else if(tryAmt<=perWeek){ v.className="verdict think"; v.textContent=`${fmt(tryAmt)} is more than one day's ${fmt(perDay)}, but fits in this week's ${fmt0(perWeek)}. Fine if you spend less on the other days.`; }
-  else { v.className="verdict no"; v.textContent=`${fmt(tryAmt)} is more than a whole week of guilt-free money (${fmt0(perWeek)}). Plan for it or save up first.`; }
+  $("gfMath").innerHTML = `Left to spend <b>${fmt(left)}</b> − saving for ${esc(goalName)} <b>${fmt(saveP)}</b> = <b>${fmt(guiltFree)}</b> guilt-free per ${per}`;
+  const v = $("verdict"), days = perDay>0 ? tryAmt/perDay : 0;
+  if(!state.income.amount) alertBox(v,"info","Enter your take-home pay","Add it in step 1 to see your guilt-free money.");
+  else if(left<=0) alertBox(v,"no","Nothing left to spend","Your bills are more than your pay right now, so there's nothing left to save or spend. Start by looking for a bill to cut.");
+  else if(perDay<=0) alertBox(v,"warn","No guilt-free money: you're saving all of it",`Saving 100% of what's left is the fastest way to ${goalName}, but it leaves nothing for day-to-day spending. Lower the savings slider in step 3 to free some up.`);
+  else if(!tryAmt) alertBox(v,"ok",`You have ${fmt(perDay)} a day to spend guilt-free`,`That's ${fmt0(perWeek)} a week. Type a price above to check whether a purchase fits.`);
+  else if(tryAmt<=perDay) alertBox(v,"ok",`${fmt(tryAmt)}: go for it`,`It's ${Math.round(tryAmt/perDay*100)}% of today's ${fmt(perDay)} guilt-free money.`);
+  else if(tryAmt<=perWeek) alertBox(v,"warn",`${fmt(tryAmt)}: think it over`,`It's more than one day's guilt-free money (${fmt(perDay)}), about ${days.toFixed(1)} days' worth, but it fits in this week's ${fmt0(perWeek)}. Fine if you spend less on the other days.`);
+  else alertBox(v,"no",`${fmt(tryAmt)}: save up first`,`It's more than a whole week of guilt-free money (${fmt0(perWeek)}), about ${dur(days)} of it. Plan for it or save up first.`);
   save();
 }
 function dur(days){
@@ -575,7 +738,7 @@ function endEdit(){
   editIdx = null; $("billForm").reset();
   document.querySelectorAll("#quick button.on").forEach(b=>b.classList.remove("on"));
   $("bFreq").value="monthly"; $("bCat").value="other";
-  $("billSubmit").textContent="Add bill"; $("billCancel").hidden=true; $("billFormTitle").textContent="2. Add a regular bill";
+  $("billSubmit").textContent="Add bill"; $("billCancel").hidden=true; $("billFormTitle").textContent="Add a regular bill";
 }
 function startEdit(i){
   const b = state.bills[i]; if(!b) return;
@@ -584,21 +747,32 @@ function startEdit(i){
   $("billForm").scrollIntoView({block:"center"}); $("bAmt").focus(); render();
 }
 $("bills").addEventListener("click",e=>{
+  if(e.target.closest("[data-sample]")){ loadSample(); return; }
   const del = e.target.closest(".x:not(.ed)");
-  if(del){ state.bills.splice(+del.dataset.i,1); endEdit(); render(); return; }
+  if(del){
+    const i = +del.dataset.i, [gone] = state.bills.splice(i,1);
+    endEdit(); render();
+    toast(`Removed ${gone.name}.`,()=>{ state.bills.splice(Math.min(i,state.bills.length),0,gone); endEdit(); render(); });
+    return;
+  }
   const row = e.target.closest(".bill"); if(row) startEdit(+row.dataset.i);
 });
 $("billCancel").addEventListener("click",()=>{ endEdit(); render(); });
 $("billForm").addEventListener("submit",e=>{
   e.preventDefault();
   const bill = {name:$("bName").value.trim(),amount:+$("bAmt").value||0,freq:$("bFreq").value,cat:$("bCat").value};
-  if(editIdx!=null) state.bills[editIdx] = bill; else state.bills.push(bill);
+  const editing = editIdx!=null;
+  if(editing) state.bills[editIdx] = bill; else state.bills.push(bill);
   endEdit(); $("bName").focus(); render();
+  toast(editing ? `Saved ${bill.name}.` : `Added ${bill.name}.`);
 });
-$("sampleBtn").addEventListener("click",()=>{
+function loadSample(){
+  if((state.bills.length || state.income.amount) && !confirm("Replace your current budget with the example budget?")) return;
   state = {...JSON.parse(JSON.stringify(SAMPLE)),period:state.period,tryAmt:state.tryAmt,efMonths:state.efMonths};
   endEdit(); syncInputs(); render();
-});
+  toast("Example budget loaded.");
+}
+$("sampleBtn").addEventListener("click",loadSample);
 function syncInputs(){
   $("incAmt").value = state.income.amount || ""; $("incFreq").value = state.income.freq;
   $("tryAmt").value = state.tryAmt || ""; fillGoal();
@@ -619,24 +793,24 @@ function normalize(d){ // validate imported data and fill in anything missing
     tryAmt:d.tryAmt==null ? 10 : num(d.tryAmt)
   };
 }
-function ioMsg(kind,text){ const m=$("ioMsg"); m.hidden=false; m.className="verdict "+kind; m.textContent=text; }
+const ioMsg = (kind,title,text) => alertBox($("ioMsg"),kind,title,text);
 function importText(text){
   let data;
   try{ data = normalize(JSON.parse(text.trim())); }
-  catch{ ioMsg("no","That doesn't look like Leftover data. Copy the whole text from Export on your other device."); return; }
+  catch{ ioMsg("no","That doesn't look like Leftover data","Copy the whole text from Export on your other device and try again."); return; }
   if(state.bills.length && !confirm(`Replace your current budget with the imported one (${data.bills.length} bills)?`)) return;
   state = data; endEdit(); syncInputs(); render();
-  ioMsg("ok",`Imported ${data.bills.length} bill${data.bills.length===1?"":"s"}. Your budget is saved in this browser.`);
+  ioMsg("ok",`Imported ${plural(data.bills.length,"bill")}`,"Your budget is saved in this browser.");
 }
 $("exportBtn").addEventListener("click",async()=>{
   const t = $("ioText"); t.value = exportText(); t.select();
-  try{ await navigator.clipboard.writeText(t.value); ioMsg("ok","Copied. Send it to your other device (message, email, notes), then paste it into Import there."); }
-  catch{ try{ document.execCommand("copy"); ioMsg("ok","Copied. Paste it into Import on your other device."); }
-         catch{ ioMsg("think","Select the text above and copy it, then paste it into Import on your other device."); } }
+  try{ await navigator.clipboard.writeText(t.value); ioMsg("ok","Copied","Send it to your other device (message, email, notes), then paste it into Import there."); }
+  catch{ try{ document.execCommand("copy"); ioMsg("ok","Copied","Paste it into Import on your other device."); }
+         catch{ ioMsg("info","Copy the text yourself","Select the text above and copy it, then paste it into Import on your other device."); } }
 });
 $("importBtn").addEventListener("click",()=>{
   const t = $("ioText").value;
-  if(!t.trim()){ ioMsg("think","Paste the exported text into the box first."); $("ioText").focus(); return; }
+  if(!t.trim()){ ioMsg("info","Nothing to import yet","Paste the exported text into the box first, then click Import."); $("ioText").focus(); return; }
   importText(t);
 });
 $("downloadBtn").addEventListener("click",()=>{
@@ -644,18 +818,30 @@ $("downloadBtn").addEventListener("click",()=>{
   a.href = URL.createObjectURL(new Blob([exportText()],{type:"application/json"}));
   a.download = `leftover-${new Date().toISOString().slice(0,10)}.json`;
   a.click(); setTimeout(()=>URL.revokeObjectURL(a.href),1000);
-  ioMsg("ok","Downloaded. Open this file with Open file on your other device.");
+  ioMsg("ok","Downloaded","Open this file with Open file on your other device.");
 });
 $("openBtn").addEventListener("click",()=>$("ioFile").click());
-
-// Print: stamp the date, then use the print stylesheet
-const stampDate = () => $("printDate").textContent = "Printed " + new Date().toLocaleDateString("en-AU",{day:"numeric",month:"short",year:"numeric"});
-window.addEventListener("beforeprint",stampDate);
-$("printBtn").addEventListener("click",()=>{ stampDate(); window.print(); });
 $("ioFile").addEventListener("change",async e=>{
   const f = e.target.files[0]; if(!f) return;
   const text = await f.text(); $("ioText").value = text; importText(text); e.target.value = "";
 });
+
+// Notice: shown in full on a first visit, then remembers if you hide it
+const notice = $("notice");
+try{ if(localStorage.getItem(NOTICE_KEY)==="closed") notice.open = false; }catch{}
+notice.querySelector("summary").addEventListener("click",()=>setTimeout(()=>{
+  try{ localStorage.setItem(NOTICE_KEY, notice.open ? "open" : "closed"); }catch{}
+}));
+
+// Print: stamp the date and show the full notice, then use the print stylesheet
+let noticeWasOpen = true;
+const beforePrint = () => {
+  $("printDate").textContent = "Printed " + new Date().toLocaleDateString("en-AU",{day:"numeric",month:"short",year:"numeric"});
+  noticeWasOpen = notice.open; notice.open = true;
+};
+window.addEventListener("beforeprint",beforePrint);
+window.addEventListener("afterprint",()=>{ notice.open = noticeWasOpen; });
+$("printBtn").addEventListener("click",()=>window.print());
 render();
 </script>
 </body>
